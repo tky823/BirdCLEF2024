@@ -1,0 +1,72 @@
+[build-system]
+requires = [
+    "setuptools",
+    "torch",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "birdclef2024"
+authors = [
+    {name = "Takuya Hasumi"},
+]
+description = "for BirdCLEF2024"
+readme = "README.md"
+license = {file = "LICENSE"}
+urls = {url = "https://github.com/tky823/birdclef2024"}
+requires-python = ">=3.8, <4"
+dependencies = [
+    # https://github.com/facebookresearch/hydra/issues/2870
+    "importlib_resources < 6.2; python_version == '3.8'",
+    "omegaconf",
+    "hydra-core",
+    "matplotlib",
+    "torch",
+    "torchaudio",
+    "torchtext",
+    "torchvision",
+    "tensorboard",
+    "webdataset",
+    "inflect",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+recipes = [
+    "tqdm",
+]
+dev = [
+    "flake8",
+    "black",
+    "isort"
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "birdclef2024.__version__"}
+
+[tool.setuptools.packages.find]
+include = [
+    "birdclef2024",
+]
+
+[tool.black]
+line-length = 99
+
+[tools.flake8]
+max-line-length = 99
+
+[tool.isort]
+profile = "black"
+line_length = 99
+
+[tool.pytest.ini_options]
+# to import relative paths
+pythonpath = [
+    "tests",
+]
