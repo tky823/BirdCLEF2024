@@ -13,7 +13,7 @@ authors = [
 description = "for BirdCLEF2024"
 readme = "README.md"
 license = {file = "LICENSE"}
-urls = {url = "https://github.com/tky823/birdclef2024"}
+urls = {url = "https://github.com/tky823/BirdCLEF2024"}
 requires-python = ">=3.8, <4"
 dependencies = [
     # https://github.com/facebookresearch/hydra/issues/2870
