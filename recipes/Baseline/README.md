@@ -46,6 +46,8 @@ data="birdclef2024"
 
 ### Stage 1: Training baseline model
 
+Before training, set `HUGGINGFACE_TOKEN` and `HUGGINGFACE_REPO_ID` in `.env` file.
+
 To train baseline model, run the following command:
 
 ```sh
