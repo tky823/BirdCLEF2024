@@ -1,3 +1,11 @@
+data/
+dump/
+
+# Outputs of experiments
+log/
+exp/
+tensorboard/
+
 # For Mac
 .DS_Store
 
