@@ -1,13 +1,18 @@
 import os
 
 from audyn.utils.driver import BaseTrainer as _BaseTrainer
-from huggingface_hub import upload_file
+from huggingface_hub import HfApi
 
 _token = os.getenv("HUGGINGFACE_TOKEN")
 _repo_id = os.getenv("HUGGINGFACE_REPO_ID")
 
 
 class BaseTrainer(_BaseTrainer):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.huggingface_api = HfApi(token=_token)
+
     def save_checkpoint(self, save_path: str) -> None:
         super().save_checkpoint(save_path)
 
@@ -20,12 +25,12 @@ class BaseTrainer(_BaseTrainer):
         repo_type = "model"
 
         try:
-            upload_file(
+            self.huggingface_api.upload_file(
                 path_or_fileobj=path,
                 path_in_repo=path_in_repo,
                 repo_id=_repo_id,
-                token=_token,
                 repo_type=repo_type,
+                run_as_future=True,
             )
         except Exception:
             # give up uploading
