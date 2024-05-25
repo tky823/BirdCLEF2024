@@ -1,0 +1,10 @@
+_target_: audyn.models.AudioSpectrogramTransformer.build_from_pretraine
+pretrained_model_name_or_path: ast-base-stride10
+aggregator:
+  _target_: audyn.models.ast.HeadTokensAggregator
+  insert_cls_token: true
+  insert_dist_token: true
+head:
+  _target_: audyn.models.ast.MLPHead
+  in_channels: 768
+  out_channels: ${const:audyn.utils.data.birdclef.birdclef2024.num_primary_labels}
