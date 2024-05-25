@@ -16,7 +16,7 @@ train="birdclef2024baseline"
 test="birdclef2024baseline"
 model="birdclef2024baseline"
 
-. ../../_common/parse_options.sh || exit 1;
+. ../_common/parse_options.sh || exit 1;
 
 dump_dir="${dump_root}/${data}"
 list_dir="${dump_dir}/list"
