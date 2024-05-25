@@ -1,5 +1,7 @@
 _target_: audyn.models.AudioSpectrogramTransformer.build_from_pretrained
 pretrained_model_name_or_path: ast-base-stride10
+n_bins: ${data.melspectrogram.n_mels}
+n_frames: ${data.melspectrogram.n_frames}
 aggregator:
   _target_: audyn.models.ast.HeadTokensAggregator
   insert_cls_token: true
