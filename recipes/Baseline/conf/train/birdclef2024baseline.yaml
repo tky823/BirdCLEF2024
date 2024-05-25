@@ -83,4 +83,4 @@ output:
 steps:
   epochs: 10
   iterations:
-  lr_scheduler:
+  lr_scheduler: epoch
