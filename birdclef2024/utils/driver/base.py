@@ -6,7 +6,7 @@ from huggingface_hub import HfApi
 from ..kaggle import load_huggingface_repo_id, load_huggingface_token
 
 _token = load_huggingface_token()
-_repo_id = load_huggingface_repo_id(load_huggingface_repo_id)
+_repo_id = load_huggingface_repo_id()
 
 
 class BaseTrainer(_BaseTrainer):
