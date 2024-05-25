@@ -63,8 +63,8 @@ dump_format="birdclef2024"
 data="birdclef2024"
 train="birdclef2024baseline"
 model="birdclef2024baseline"
-optimizer="adam"
-lr_scheduler="none"
+optimizer="birdclef2024baseline"
+lr_scheduler="birdclef2024"
 criterion="birdclef2024"
 
 . ./run.sh \
