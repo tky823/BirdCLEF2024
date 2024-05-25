@@ -25,8 +25,8 @@ data="birdclef2024"
 train="birdclef2024baseline"
 test="birdclef2024baseline"
 model="birdclef2024baseline"
-optimizer="adam"
-lr_scheduler="none"
+optimizer="birdclef2024baseline"
+lr_scheduler="cos_anneal"
 criterion="birdclef2024"
 
 . ../_common/parse_options.sh || exit 1;

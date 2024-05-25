@@ -1,0 +1,8 @@
+defaults:
+  - adam
+
+lr:
+  _target_: operator.mul
+  _args_:
+    - 8.0e-6
+    - ${train.dataloader.train.batch_size}
