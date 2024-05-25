@@ -70,7 +70,7 @@ output:
   tensorboard_dir: "./tensorboard"
   save_checkpoint:
     iteration:
-      every: 100000
+      every: 1000
       path: ${...exp_dir}/model/iteration{iteration}.pth
     epoch:
       every: 1
