@@ -1,4 +1,4 @@
-_target_: audyn.models.AudioSpectrogramTransformer.build_from_pretraine
+_target_: audyn.models.AudioSpectrogramTransformer.build_from_pretrained
 pretrained_model_name_or_path: ast-base-stride10
 aggregator:
   _target_: audyn.models.ast.HeadTokensAggregator
