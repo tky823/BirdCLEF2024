@@ -12,8 +12,8 @@ dump_format="birdclef2024"
 system="defaults"
 preprocess="birdclef2024"
 data="birdclef2024"
-train="birdclef2024baseline"
-test="birdclef2024baseline"
+train="birdclef2024baseline_birdclef2024"
+test="birdclef2024baseline_birdclef2024"
 model="birdclef2024baseline"
 
 . ../_common/parse_options.sh || exit 1;
@@ -45,7 +45,6 @@ data="${data}" \
 train="${train}" \
 test="${test}" \
 model="${model}" \
-test/dataset="${dump_format}" \
 preprocess.dump_format="${dump_format}" \
 test.dataset.test.list_path="${test_list_path}" \
 test.dataset.test.feature_dir="${test_feature_dir}" \
