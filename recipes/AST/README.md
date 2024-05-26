@@ -6,7 +6,8 @@ Finetune audio spectrogram transformer using BirdCLEF2024 dataset.
 
 ### Stages -1 ~ 0: Downloading dataset
 
-See `BirdCLEF2024/recipes/Baseline/README.md`
+See `BirdCLEF2024/recipes/Baseline/README.md`.
+Note that, you have to set `data="birdclef2024ast"` unlike baseline recipe.
 
 ### Stage 1: Training AST
 
