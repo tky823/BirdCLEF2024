@@ -5,6 +5,6 @@ defaults:
 train:
   _target_: birdclef2024.utils.data.WeightedBirdCLEF2024PrimaryLabelDataset
   replacement: true
-  smooth: 1000
+  smooth: 10
 validation:
   _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDataset
