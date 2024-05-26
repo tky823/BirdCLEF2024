@@ -27,7 +27,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline_birdclef2024"
+train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 model="birdclef2024ast"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
@@ -47,6 +47,8 @@ criterion="birdclef2024"
 --criterion "${criterion}"
 ```
 
+**NOTE**: On kaggle, `batch_size=64` defined in `conf/train` may cause OOM error.
+
 ### Stage 2: Preprocessing test dataset
 
 ```sh
@@ -59,7 +61,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline_birdclef2024"
+train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 test="birdclef2024baseline_birdclef2024"
 
 . ./run.sh \
@@ -90,7 +92,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline_birdclef2024"
+train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 test="birdclef2024baseline_birdclef2024"
 model="birdclef2024ast"
 
@@ -122,7 +124,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline_birdclef2024"
+train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 test="birdclef2024baseline_birdclef2024"
 model="birdclef2024ast"
 
