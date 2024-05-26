@@ -60,7 +60,7 @@ fi
 
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "Stage 1: Train EfficientNet"
+    echo "Stage 1: Train AST"
 
     (
         . ./train.sh \
@@ -98,7 +98,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "Stage 3: Infer by EfficientNet"
+    echo "Stage 3: Infer by AST"
 
     (
         . ./test.sh \
