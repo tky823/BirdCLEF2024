@@ -25,11 +25,12 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 # "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
+# NOTE: "train" config depends on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline"
+train="birdclef2024baseline_birdclef2024"
 model="birdclef2024ast"
 optimizer="birdclef2024baseline"
-lr_scheduler="birdclef2024"
+lr_scheduler="cos_anneal"
 criterion="birdclef2024"
 
 . ./run.sh \
@@ -56,14 +57,19 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 # "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
+# NOTE: "train" config depends on "dump_format".
 data="birdclef2024ast"
+train="birdclef2024baseline_birdclef2024"
+test="birdclef2024baseline_birdclef2024"
 
 . ./run.sh \
 --stage 2 \
 --stop-stage 2 \
 --data-root "${data_root}" \
 --dump-format "${dump_format}" \
---data "${data}"
+--data "${data}" \
+--train "${train}" \
+--test "${test}"
 ```
 
 ### Stage 3: Inference by AST
@@ -82,9 +88,10 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 # "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
+# NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline"
-test="birdclef2024baseline"
+train="birdclef2024baseline_birdclef2024"
+test="birdclef2024baseline_birdclef2024"
 model="birdclef2024ast"
 
 . ./run.sh \
@@ -113,9 +120,10 @@ submission_path=<PATH/TO/SAVE/SUBMISSION.CSV>
 # "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
+# NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
-train="birdclef2024baseline"
-test="birdclef2024baseline"
+train="birdclef2024baseline_birdclef2024"
+test="birdclef2024baseline_birdclef2024"
 model="birdclef2024ast"
 
 . ./run.sh \
