@@ -1,8 +1,11 @@
 import os
 
+import torch
+from audyn.utils.driver import BaseGenerator as _BaseGenerator
 from audyn.utils.driver import BaseTrainer as _BaseTrainer
 from huggingface_hub import HfApi
 from hydra.core.hydra_config import HydraConfig
+from tqdm import tqdm
 
 from ..kaggle import load_huggingface_repo_id, load_huggingface_token
 
@@ -76,3 +79,43 @@ class BaseTrainer(_BaseTrainer):
         except Exception:
             # give up uploading
             self.logger.info(f"Failed in uploading {path_in_repo}")
+
+
+class BaseGenerator(_BaseGenerator):
+    @torch.no_grad()
+    def run(self) -> None:
+        test_config = self.config.test
+        key_mapping = test_config.key_mapping.inference
+
+        self.model.eval()
+
+        for named_data in tqdm(self.loader):
+            named_data = self.move_data_to_device(named_data, self.device)
+            named_input = self.map_to_named_input(named_data, key_mapping=key_mapping)
+            named_identifier = self.map_to_named_identifier(named_data, key_mapping=key_mapping)
+
+            if hasattr(self.unwrapped_model, "inference"):
+                output = self.unwrapped_model.inference(**named_input)
+            else:
+                output = self.unwrapped_model(**named_input)
+
+            named_output = self.map_to_named_output(output, key_mapping=key_mapping)
+
+            self.save_inference_torch_dump_if_necessary(
+                named_output,
+                named_data,
+                named_identifier,
+                config=test_config.output,
+            )
+            self.save_inference_audio_if_necessary(
+                named_output,
+                named_data,
+                named_identifier,
+                config=test_config.output,
+            )
+            self.save_inference_spectrogram_if_necessary(
+                named_output,
+                named_data,
+                named_identifier,
+                config=test_config.output,
+            )
