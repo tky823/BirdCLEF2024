@@ -1,5 +1,5 @@
 test:
-  _target_: birdclef2024.utils.data.birdclef.birdclef2024.dataset.BirdCLEF2024AudioDataset
+  _target_: birdclef2024.utils.data.BirdCLEF2024AudioDataset
   list_path:
   feature_dir:
   audio_key: audio
