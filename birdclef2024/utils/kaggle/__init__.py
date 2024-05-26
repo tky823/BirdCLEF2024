@@ -3,10 +3,8 @@ from typing import Optional
 
 try:
     from kaggle_secrets import UserSecretsClient
-    from kaggle_web_client import BackendError
 except ImportError:
     UserSecretsClient = None
-    BackendError = None
 
 __all__ = [
     "load_huggingface_token",
@@ -22,7 +20,7 @@ def load_huggingface_token() -> Optional[str]:
 
         try:
             token = user_secrets.get_secret("HUGGINGFACE_TOKEN")
-        except BackendError:
+        except Exception:
             # if HUGGINGFACE_TOKEN is not defined
             pass
 
@@ -40,7 +38,7 @@ def load_huggingface_repo_id() -> Optional[str]:
 
         try:
             repo_id = user_secrets.get_secret("HUGGINGFACE_REPO_ID")
-        except BackendError:
+        except Exception:
             # if HUGGINGFACE_REPO_ID is not defined
             pass
 
