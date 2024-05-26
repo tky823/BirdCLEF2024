@@ -8,11 +8,11 @@ Finetune audio spectrogram transformer using BirdCLEF2024 dataset.
 
 See `BirdCLEF2024/recipes/Baseline/README.md`
 
-### Stage 1: Training baseline model
+### Stage 1: Training AST
 
 Before training, set `HUGGINGFACE_TOKEN` and `HUGGINGFACE_REPO_ID` in `.env` file.
 
-To train baseline model, run the following command:
+To train AST, run the following command:
 
 ```sh
 tag=<TAG>
@@ -65,9 +65,9 @@ data="birdclef2024ast"
 --data "${data}"
 ```
 
-### Stage 3: Inference by baseline model
+### Stage 3: Inference by AST
 
-To infer by baseline model, run the following command:
+To infer by AST, run the following command:
 
 ```sh
 tag=<TAG>
@@ -84,7 +84,7 @@ dump_format="birdclef2024"
 data="birdclef2024ast"
 train="birdclef2024baseline"
 test="birdclef2024baseline"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 
 . ./run.sh \
 --stage 3 \
@@ -115,7 +115,7 @@ dump_format="birdclef2024"
 data="birdclef2024ast"
 train="birdclef2024baseline"
 test="birdclef2024baseline"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 
 . ./run.sh \
 --stage 4 \
