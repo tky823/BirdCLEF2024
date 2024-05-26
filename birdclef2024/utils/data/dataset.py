@@ -9,14 +9,22 @@ from audyn.utils.data.birdclef.birdclef2024 import decode_csv_line
 from audyn.utils.data.birdclef.birdclef2024.dataset import (
     BirdCLEF2024AudioDataset as _BirdCLEF2024AudioDataset,
 )
+from audyn.utils.data.birdclef.birdclef2024.dataset import (
+    BirdCLEF2024PrimaryLabelDataset as _BirdCLEF2024PrimaryLabelDataset,
+)
 from torch.utils.data import IterableDataset, get_worker_info
 
 from .sampler import BirdCLEF2024WeightedRandomSampler
 
 __all__ = [
+    "BirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024AudioDataset",
     "WeightedBirdCLEF2024PrimaryLabelDataset",
 ]
+
+
+class BirdCLEF2024PrimaryLabelDataset(_BirdCLEF2024PrimaryLabelDataset):
+    """Alias of audyn.utils.data.birdclef.birdclef2024.dataset.BirdCLEF2024PrimaryLabelDataset"""
 
 
 class BirdCLEF2024AudioDataset(_BirdCLEF2024AudioDataset):
