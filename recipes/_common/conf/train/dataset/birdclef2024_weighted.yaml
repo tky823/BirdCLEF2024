@@ -7,4 +7,4 @@ train:
   replacement: true
   smooth: 1000
 validation:
-  _target_: audyn.utils.data.birdclef.birdclef2024.dataset.BirdCLEF2024PrimaryLabelDataset
+  _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDataset
