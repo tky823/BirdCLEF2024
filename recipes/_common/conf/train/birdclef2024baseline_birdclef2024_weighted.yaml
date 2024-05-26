@@ -1,0 +1,8 @@
+defaults:
+  - birdclef2024baseline
+  - override dataset: birdclef2024_weighted
+  - _self_
+
+dataloader:
+  train:
+    shuffle: false
