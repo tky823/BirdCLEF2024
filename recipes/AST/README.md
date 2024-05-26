@@ -1,54 +1,19 @@
 # BirdCLEF2024
 
-[Baseline recipe](https://www.kaggle.com/code/awsaf49/birdclef24-kerascv-starter-train) of [BirdCLEF2024](https://www.kaggle.com/competitions/birdclef-2024) challenge.
+Finetune audio spectrogram transformer using BirdCLEF2024 dataset.
 
 ## Stages
 
-### Stage -1: Downloading dataset
+### Stages -1 ~ 0: Downloading dataset
 
-Download dataset and place it as `../data/birdclef-2024.zip`.
-Then, unzip the file.
+See `BirdCLEF2024/recipes/Baseline/README.md`.
+Note that, you have to set `data="birdclef2024ast"` unlike baseline recipe.
 
-```sh
-recipes/BirdCLEF2024/
-|- data/
-    |- birdclef-2024.zip
-    |- birdclef-2024/
-        |- eBird_Taxonomy_v2021.csv
-        |- train_metadata.csv
-        |- sample_submission.csv
-        |- train_audio/
-        |- test_soundscapes/
-        |- unlabeled_soundscapes/
-```
-
-### Stage 0: Preprocessing
-
-```sh
-# "../data" is used by default
-# On kaggle environment, "/kaggle/input"
-data_root=<PATH/TO/ROOT/OF/DATA>
-
-# "torch", "webdataset", or "birdclef2024"
-dump_format="birdclef2024"
-
-data="birdclef2024"
-
-. ./run.sh \
---stage 0 \
---stop-stage 0 \
---data-root "${data_root}" \
---dump-format "${dump_format}" \
---data "${data}"
-```
-
-**NOTE**: `${data}/feature/train`, `${data}/feature/validation`, `${data}/feature/unlabeled_train`, and `${data}/feature/unlabeled_validation` directories are empty when `dump_format=birdclef2024`.
-
-### Stage 1: Training baseline model
+### Stage 1: Training AST
 
 Before training, set `HUGGINGFACE_TOKEN` and `HUGGINGFACE_REPO_ID` in `.env` file.
 
-To train baseline model, run the following command:
+To train AST, run the following command:
 
 ```sh
 tag=<TAG>
@@ -61,9 +26,9 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
-data="birdclef2024"
+data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
 criterion="birdclef2024"
@@ -93,7 +58,7 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
-data="birdclef2024"
+data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"
 test="birdclef2024baseline_birdclef2024"
 
@@ -107,9 +72,9 @@ test="birdclef2024baseline_birdclef2024"
 --test "${test}"
 ```
 
-### Stage 3: Inference by baseline model
+### Stage 3: Inference by AST
 
-To infer by baseline model, run the following command:
+To infer by AST, run the following command:
 
 ```sh
 tag=<TAG>
@@ -124,10 +89,10 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 dump_format="birdclef2024"
 
 # NOTE: "train" and "test" configs depend on "dump_format".
-data="birdclef2024"
+data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"
 test="birdclef2024baseline_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 
 . ./run.sh \
 --stage 3 \
@@ -156,10 +121,10 @@ submission_path=<PATH/TO/SAVE/SUBMISSION.CSV>
 dump_format="birdclef2024"
 
 # NOTE: "train" and "test" configs depend on "dump_format".
-data="birdclef2024"
+data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"
 test="birdclef2024baseline_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 
 . ./run.sh \
 --stage 4 \

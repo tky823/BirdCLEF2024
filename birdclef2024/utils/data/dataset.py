@@ -66,7 +66,7 @@ class BirdCLEF2024AudioDataset(_BirdCLEF2024AudioDataset):
         list_dir = os.path.dirname(list_path)
 
         audio_root = os.path.join(feature_dir, "unlabeled_soundscapes")
-        list_path = os.path.join(list_dir, "unlabeled_train.txt")
+        list_path = os.path.join(list_dir, "unlabeled_validation.txt")
 
         filenames = []
 

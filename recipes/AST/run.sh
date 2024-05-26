@@ -21,10 +21,10 @@ dump_format="birdclef2024"
 
 system="defaults"
 preprocess="birdclef2024"
-data="birdclef2024"
+data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"
 test="birdclef2024baseline_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024ast"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
 criterion="birdclef2024"
@@ -60,7 +60,7 @@ fi
 
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "Stage 1: Train EfficientNet"
+    echo "Stage 1: Train AST"
 
     (
         . ./train.sh \
@@ -98,7 +98,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "Stage 3: Infer by EfficientNet"
+    echo "Stage 3: Infer by AST"
 
     (
         . ./test.sh \
