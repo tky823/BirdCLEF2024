@@ -1,9 +1,10 @@
 import os
 
 import audyn
-from audyn.utils import setup_config
 from audyn.utils.data.birdclef.birdclef2024 import split
 from omegaconf import DictConfig
+
+from birdclef2024.utils import setup_config
 
 
 @audyn.main()

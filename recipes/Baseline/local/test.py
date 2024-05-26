@@ -1,7 +1,8 @@
 import audyn
-from audyn.utils import setup_config
-from audyn.utils.driver import BaseGenerator
 from omegaconf import DictConfig
+
+from birdclef2024.utils import setup_config
+from birdclef2024.utils.driver import BaseGenerator
 
 
 @audyn.main()

@@ -2,9 +2,10 @@ import os
 
 import audyn
 import torch
-from audyn.utils import setup_config
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels
 from omegaconf import DictConfig
+
+from birdclef2024.utils import setup_config
 
 
 @audyn.main()

@@ -13,9 +13,10 @@ import audyn
 import torch
 import torchaudio
 import webdataset as wds
-from audyn.utils import setup_config
 from omegaconf import DictConfig
 from tqdm import tqdm
+
+from birdclef2024.utils import setup_config
 
 
 @audyn.main()
