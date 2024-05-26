@@ -28,12 +28,6 @@ fi
 
 test_list_path="${list_dir}/test.txt"
 
-num_test_files=$(wc -l < "${test_list_path}")
-
-if [ ${num_test_files} -eq 0 ]; then
-    test_list_path="${list_dir}/unlabeled_validation.txt"
-fi
-
 if [ "${dump_format}" = "birdclef2024" ]; then
     test_feature_dir="${data_root}/birdclef-2024"
 else
