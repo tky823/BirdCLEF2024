@@ -27,6 +27,12 @@ fi
 
 test_list_path="${list_dir}/test.txt"
 
+num_test_files=$(wc -l < "${test_list_path}")
+
+if [ ${num_test_files} -eq 0 ]; then
+    test_list_path="${list_dir}/unlabeled_validation.txt"
+fi
+
 exp_dir="${exp_root}/${tag}"
 test_inference_dir="${exp_dir}/inference"
 
