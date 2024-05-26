@@ -32,17 +32,14 @@ data_root=<PATH/TO/ROOT/OF/DATA>
 # "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
-# NOTE: "train" config depends on "dump_format".
 data="birdclef2024"
-train="birdclef2024baseline_birdclef2024"
 
 . ./run.sh \
 --stage 0 \
 --stop-stage 0 \
 --data-root "${data_root}" \
 --dump-format "${dump_format}" \
---data "${data}" \
---train "${train}"
+--data "${data}"
 ```
 
 **NOTE**: `${data}/feature/train`, `${data}/feature/validation`, `${data}/feature/unlabeled_train`, and `${data}/feature/unlabeled_validation` directories are empty when `dump_format=birdclef2024`.
