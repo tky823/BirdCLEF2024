@@ -3,6 +3,9 @@ defaults:
   - override dataset: torch
   - _self_
 
+generator:
+  _target_: birdclef2024.utils.driver.BaseGenerator
+
 dataloader:
   test:
     batch_size: 1
