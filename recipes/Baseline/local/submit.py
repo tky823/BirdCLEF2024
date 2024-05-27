@@ -12,6 +12,9 @@ from birdclef2024.utils import setup_config
 def main(config: DictConfig) -> None:
     setup_config(config)
 
+    total_duration = 240  # 4min.
+    step = 5  # per 5sec.
+
     list_path = config.preprocess.list_path
     feature_dir = config.preprocess.feature_dir
     submission_path = config.preprocess.submission_path
@@ -40,16 +43,19 @@ def main(config: DictConfig) -> None:
         f.write(line + "\n")
 
         for filename in filenames:
-            line = f"{filename},"
-            f.write(line)
-
             path = os.path.join(feature_dir, f"{filename}.pth")
 
             estimated = torch.load(path, map_location=lambda storage, loc: storage)
             estimated = estimated.tolist()
             estimated = [str(_estimated) for _estimated in estimated]
-            line = ",".join(estimated)
-            f.write(line + "\n")
+
+            for start in range(0, total_duration, step):
+                end = start + step
+
+                line = f"{filename}_{end},"
+                f.write(line)
+                line = ",".join(estimated)
+                f.write(line + "\n")
 
 
 if __name__ == "__main__":
