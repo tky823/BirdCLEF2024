@@ -1,3 +1,4 @@
+from .collator import BirdCLEF2024BaselineCollator
 from .composer import BirdCLEF2024AudioComposer, BirdCLEF2024PrimaryLabelComposer
 from .dataset import (
     BirdCLEF2024AudioDataset,
@@ -13,4 +14,5 @@ __all__ = [
     "BirdCLEF2024WeightedRandomSampler",
     "BirdCLEF2024PrimaryLabelComposer",
     "BirdCLEF2024AudioComposer",
+    "BirdCLEF2024BaselineCollator",
 ]
