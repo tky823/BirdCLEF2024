@@ -1,0 +1,11 @@
+defaults:
+  - birdclef2024baseline
+  - _self_
+
+dataloader:
+  test:
+    collate_fn:
+      composer:
+        chunk_duration: 10
+        hop_duration: 5
+        pad_duration: 2.5
