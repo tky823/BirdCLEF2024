@@ -1,3 +1,4 @@
+import glob
 import os
 
 import audyn
@@ -11,9 +12,6 @@ from birdclef2024.utils import setup_config
 @audyn.main()
 def main(config: DictConfig) -> None:
     setup_config(config)
-
-    total_duration = 240  # 4min.
-    step = 5  # per 5sec.
 
     list_path = config.preprocess.list_path
     feature_dir = config.preprocess.feature_dir
@@ -43,16 +41,17 @@ def main(config: DictConfig) -> None:
         f.write(line + "\n")
 
         for filename in filenames:
-            path = os.path.join(feature_dir, f"{filename}.pth")
+            template_path = os.path.join(feature_dir, f"{filename}_*.pth")
+            paths = sorted(glob.glob(template_path))
 
-            estimated = torch.load(path, map_location=lambda storage, loc: storage)
-            estimated = estimated.tolist()
-            estimated = [str(_estimated) for _estimated in estimated]
+            for path in paths:
+                estimated = torch.load(path, map_location=lambda storage, loc: storage)
+                estimated = estimated.tolist()
+                estimated = [str(_estimated) for _estimated in estimated]
 
-            for start in range(0, total_duration, step):
-                end = start + step
-
-                line = f"{filename}_{end},"
+                endtime_filename = os.path.basename(path)
+                endtime_filename, _ = os.path.splitext(endtime_filename)
+                line = f"{endtime_filename},"
                 f.write(line)
                 line = ",".join(estimated)
                 f.write(line + "\n")
