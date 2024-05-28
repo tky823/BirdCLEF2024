@@ -28,7 +28,7 @@ dependencies = [
     "tensorboard",
     "webdataset",
     "huggingface-hub",
-    "Audyn == 0.0.1.dev6",
+    "Audyn == 0.0.1.dev7",
 ]
 dynamic = [
     "version",
