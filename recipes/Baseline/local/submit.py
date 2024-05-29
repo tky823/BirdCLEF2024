@@ -4,7 +4,6 @@ import os
 import audyn
 import torch
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels
-from natsort import natsorted
 from omegaconf import DictConfig
 
 from birdclef2024.utils import setup_config
@@ -43,7 +42,8 @@ def main(config: DictConfig) -> None:
 
         for filename in filenames:
             template_path = os.path.join(feature_dir, f"{filename}_*.pth")
-            paths = natsorted(glob.glob(template_path))
+            paths = glob.glob(template_path)
+            paths = sorted(paths, key=lambda path: extract_endtime_from_path(path))
 
             for path in paths:
                 estimated = torch.load(path, map_location=lambda storage, loc: storage)
@@ -56,6 +56,15 @@ def main(config: DictConfig) -> None:
                 f.write(line)
                 line = ",".join(estimated)
                 f.write(line + "\n")
+
+
+def extract_endtime_from_path(path: str) -> int:
+    filename = os.path.basename(path)
+    filename, _ = os.path.splitext(filename)
+    _, endtime = filename.rsplit("_", maxsplit=1)
+    endtime = int(endtime)
+
+    return endtime
 
 
 if __name__ == "__main__":
