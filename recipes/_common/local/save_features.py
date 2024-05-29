@@ -15,11 +15,11 @@ import audyn
 import torch
 import torchaudio
 import webdataset as wds
-from audyn.utils.data.birdclef.birdclef2024 import decode_csv_line
 from omegaconf import DictConfig
 from tqdm import tqdm
 
 from birdclef2024.utils import setup_config
+from birdclef2024.utils.data import decode_csv_line
 
 
 @audyn.main()
