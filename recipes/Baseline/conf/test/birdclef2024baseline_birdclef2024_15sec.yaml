@@ -1,0 +1,12 @@
+defaults:
+  - birdclef2024baseline_birdclef2024
+  - _self_
+
+dataloader:
+  test:
+    batch_size: 1
+    collate_fn:
+      composer:
+        chunk_duration: 15  # equal to ${data.audio.duration}
+        hop_duration: 5
+        pad_duration: 5
