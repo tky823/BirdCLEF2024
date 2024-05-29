@@ -19,6 +19,7 @@ dataloader:
         waveform_key: waveform
         melspectrogram_key: log_melspectrogram
         sample_rate: ${data.audio.sample_rate}
+        max_duration: 240
         chunk_duration: 5
         hop_duration: 5
         pad_duration: 0
