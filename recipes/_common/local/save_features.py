@@ -149,7 +149,7 @@ def main(config: DictConfig) -> None:
             p.join()
 
         writing_process.join()
-    elif dump_format == "birdclef2024":
+    elif "birdclef" in dump_format:
         pass
     else:
         raise ValueError(f"Invalid dump_format={dump_format} is detected.")
