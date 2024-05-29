@@ -1,0 +1,6 @@
+defaults:
+  - birdclef2024
+  - _self_
+
+birdclef2024_train_list_path:
+birdclef2024_validation_list_path:
