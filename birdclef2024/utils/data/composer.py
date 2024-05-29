@@ -44,6 +44,8 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
         waveform_key (str): Key of waveform to add to given sample.
         melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
         sample_rate (int): Target sampling rate. Default: ``32000``.
+        max_duration (float, optional): Max duration. Since some test samples are longer
+            than 240s, this option is useful.
         chunk_duration (float): Duration of chunked audio. Default: ``5``.
         hop_duration (float, optional): Duration of hop size. If ``None``,
             ``chunk_duration`` is used.
@@ -83,6 +85,7 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
         waveform_key: str = "waveform",
         melspectrogram_key: str = "melspectrogram",
         sample_rate: int = 32000,
+        max_duration: Optional[float] = None,
         chunk_duration: float = 5,
         hop_duration: Optional[float] = None,
         pad_duration: _size_2_t = 0,
@@ -109,6 +112,7 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
 
         self.primary_labels = birdclef2024_primary_labels
         self.sample_rate = sample_rate
+        self.max_duration = max_duration
         self.chunk_duration = chunk_duration
         self.hop_duration = hop_duration
         self.pad_duration = _pair(pad_duration)
@@ -136,6 +140,7 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
         waveform_key = self.waveform_key
         melspectrogram_key = self.melspectrogram_key
         target_sample_rate = self.sample_rate
+        max_duration = self.max_duration
         chunk_duration = self.chunk_duration
         hop_duration = self.hop_duration
         pad_duration = self.pad_duration
@@ -153,6 +158,20 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
         if sample_rate != target_sample_rate:
             audio = aF.resample(audio, sample_rate, target_sample_rate)
             sample_rate = target_sample_rate
+
+        if max_duration is not None:
+            max_length = int(max_duration * sample_rate)
+
+            if audio.size(-1) > max_length:
+                trimming = audio.size(-1) - max_length
+
+                if self.training:
+                    trimming_left = torch.randint(0, trimming, ()).item()
+                else:
+                    trimming_left = trimming // 2
+
+                trimming_right = trimming - trimming_left
+                audio = F.pad(audio, (-trimming_left, -trimming_right))
 
         chunk_length = int(sample_rate * chunk_duration)
         hop_length = int(sample_rate * hop_duration)
