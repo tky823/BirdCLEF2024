@@ -32,7 +32,8 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 
     subset="train"
     list_path="${list_dir}/${subset}.txt"
-    tmp_path="$(uuidgen).txt"
+    tmp_id=$(python -c "import uuid; print(str(uuid.uuid4()))")
+    tmp_path="${tmp_id}.txt"
 
     cat "${list_path}" | sed "s/^/birdclef-2024\//" > "${tmp_path}"
     cat "${tmp_path}" >> "${full_list_path}"
@@ -44,8 +45,8 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "Preprocess stage 2: Unify samples from in BirdCLEF2023, BirdCLEF2022, and BirdCLEF2021."
 
     for year in "2023" "2022" "2021"; do
-        list_path="${list_dir}/train_${year}.txt"
-        tmp_path="$(uuidgen).txt"
+        tmp_id=$(python -c "import uuid; print(str(uuid.uuid4()))")
+        tmp_path="${tmp_id}.txt"
 
         cat "${list_path}" | sed "s/^/birdclef-${year}\//" > "${tmp_path}"
         cat "${tmp_path}" >> "${full_list_path}"
