@@ -30,8 +30,9 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 
     mkdir -p "${list_dir}"
 
-    subset="additional_train"
+    subset="train_2023"
     list_path="${list_dir}/${subset}.txt"
+    existing_list_path="${list_dir}/additional_train.txt"
     birdclef2024_train_list_path="${list_dir}/train.txt"
     birdclef2024_validation_list_path="${list_dir}/validation.txt"
 
@@ -45,14 +46,17 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     preprocess.csv_path="${csv_path}" \
     preprocess.audio_root="${audio_root}" \
     preprocess.subset="${subset}" \
+    preprocess.existing_list_path="${existing_list_path}" \
     preprocess.birdclef2024_train_list_path="${birdclef2024_train_list_path}" \
     preprocess.birdclef2024_validation_list_path="${birdclef2024_validation_list_path}"
+
+    cat "${list_path}" >> "${existing_list_path}"
 fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "Preprocess stage 2: Save features"
 
-    subset="additional_train"
+    subset="train_2023"
     subset_list_path="${list_dir}/${subset}.txt"
     subset_feature_dir="${feature_dir}/${subset}"
 

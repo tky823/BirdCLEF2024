@@ -18,20 +18,19 @@ def main(config: DictConfig) -> None:
     assert list_path is not None, "Specify preprocess.list_path."
     assert csv_path is not None, "Specify preprocess.csv_path."
     assert subset is not None, "Specify preprocess.subset."
-    assert subset == "additional_train", "Only subset=additional_train is supported."
 
     # BirdCLEF2024
+    existing_list_path = config.preprocess.existing_list_path
     birdclef2024_train_list_path = config.preprocess.birdclef2024_train_list_path
     birdclef2024_validation_list_path = config.preprocess.birdclef2024_validation_list_path
 
     filenames = select_birdclef2024_samples(
         csv_path,
-        existing_list_path=list_path,
+        existing_list_path=existing_list_path,
         train_list_path=birdclef2024_train_list_path,
         validation_list_path=birdclef2024_validation_list_path,
     )
 
-    # overwrite list_path
     with open(list_path, mode="w") as f:
         for filename in filenames:
             filename, _ = os.path.splitext(filename)

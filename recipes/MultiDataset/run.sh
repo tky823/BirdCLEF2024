@@ -49,7 +49,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     (
         . ./preprocess_2024.sh \
         --stage 1 \
-        --stop-stage 2 \
+        --stop-stage 4 \
         --data-root "${data_root}" \
         --dump-root "${dump_root}" \
         --dump-format "${dump_format}" \
