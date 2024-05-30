@@ -12,8 +12,8 @@ log_dir="./log"
 
 dump_format="birdclef2024"
 
-preprocess="birdclef2022+2023+2024"
-data="birdclef2022+2023+2024"
+preprocess="birdclef2021+2022+2023+2024"
+data="birdclef2021+2022+2023+2024"
 
 . ../_common/parse_options.sh || exit 1;
 

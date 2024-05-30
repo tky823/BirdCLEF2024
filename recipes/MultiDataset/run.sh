@@ -20,8 +20,8 @@ dump_root="dump"
 dump_format="birdclef2024"
 
 system="defaults"
-preprocess="birdclef2022+2023+2024"
-data="birdclef2022+2023+2024"
+preprocess="birdclef2021+2022+2023+2024"
+data="birdclef2021+2022+2023+2024"
 train="birdclef2024baseline_birdclef2024"
 test="birdclef2024baseline_birdclef2024"
 model="birdclef2024baseline"
@@ -78,6 +78,21 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 
     (
         . ./preprocess_2022.sh \
+        --stage 1 \
+        --stop-stage 2 \
+        --data-root "${data_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --preprocess "${preprocess}" \
+        --data "${data}"
+    )
+fi
+
+if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
+    echo "Stage 3: Preprocess dataset of BirdCLEF2021"
+
+    (
+        . ./preprocess_2021.sh \
         --stage 1 \
         --stop-stage 2 \
         --data-root "${data_root}" \

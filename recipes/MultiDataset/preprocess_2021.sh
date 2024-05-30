@@ -17,9 +17,9 @@ data="birdclef2021+2022+2023+2024"
 
 . ../_common/parse_options.sh || exit 1;
 
-birdclef2023_dataroot="${data_root}/birdclef-2023"
-csv_path="${birdclef2023_dataroot}/train_metadata.csv"
-audio_root="${birdclef2023_dataroot}/train_audio"
+birdclef2022_dataroot="${data_root}/birdclef-2022"
+csv_path="${birdclef2022_dataroot}/train_metadata.csv"
+audio_root="${birdclef2022_dataroot}/train_audio"
 
 dump_dir="${dump_root}/${data}"
 list_dir="${dump_dir}/list"
@@ -30,7 +30,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 
     mkdir -p "${list_dir}"
 
-    subset="train_2023"
+    subset="train_2021"
     list_path="${list_dir}/${subset}.txt"
     existing_list_path="${list_dir}/additional_train.txt"
     birdclef2024_train_list_path="${list_dir}/train.txt"
@@ -56,7 +56,7 @@ fi
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "Preprocess stage 2: Save features"
 
-    subset="train_2023"
+    subset="train_2021"
     subset_list_path="${list_dir}/${subset}.txt"
     subset_feature_dir="${feature_dir}/${subset}"
 
