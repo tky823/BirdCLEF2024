@@ -72,3 +72,18 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         --data "${data}"
     )
 fi
+
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "Preprocess stage 5: Unify datasets."
+
+    (
+        . ./unify_datasets.sh \
+        --stage 1 \
+        --stop-stage 2 \
+        --data-root "${data_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --preprocess "${preprocess}" \
+        --data "${data}"
+    )
+fi
