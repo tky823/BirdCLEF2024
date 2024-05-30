@@ -45,6 +45,8 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "Preprocess stage 2: Unify samples from in BirdCLEF2023, BirdCLEF2022, and BirdCLEF2021."
 
     for year in "2023" "2022" "2021"; do
+        subset="train_${year}"
+        list_path="${list_dir}/${subset}.txt"
         tmp_id=$(python -c "import uuid; print(str(uuid.uuid4()))")
         tmp_path="${tmp_id}.txt"
 
