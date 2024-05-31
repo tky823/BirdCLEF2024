@@ -307,13 +307,21 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
         self.append_end_time_to_filename = append_end_time_to_filename
 
     def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        sample_rate_key = self.sample_rate_key
         filename_key = self.filename_key
+        waveform_key = self.waveform_key
+        melspectrogram_key = self.melspectrogram_key
         full_duration = self.full_duration
         num_chunks = self.num_chunks
 
         hop_duration = full_duration / num_chunks
 
         sample = super().process(sample)
+
+        # audio
+        sample[waveform_key] = sample[waveform_key].unsqueeze(dim=0)
+        sample[melspectrogram_key] = sample[melspectrogram_key].unsqueeze(dim=0)
+        sample[sample_rate_key] = sample[sample_rate_key].unsqueeze(dim=0)
 
         # filename
         filename = sample[filename_key]
