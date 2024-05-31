@@ -1,6 +1,6 @@
 defaults:
   - birdclef2024baseline
-  - override dataset: birdclef2024_weighted
+  - override dataset: weighted_birdclef2024
   - _self_
 
 dataloader:
