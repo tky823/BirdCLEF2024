@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 generator:
-  _target_: birdclef2024.utils.driver.BaseGenerator
+  _target_: birdclef2024.utils.driver.SharedAudioGenerator
 
 dataloader:
   test:
@@ -11,7 +11,7 @@ dataloader:
     collate_fn:
       _target_: birdclef2024.utils.data.BirdCLEF2024AudioChunkingCollator
       composer:
-        _target_: birdclef2024.utils.data.BirdCLEF2024AudioChunkingComposer
+        _target_: birdclef2024.utils.data.BirdCLEF2024SharedAudioComposer
         melspectrogram_transform: ${data.melspectrogram}
         audio_key: audio
         sample_rate_key: sample_rate
@@ -19,10 +19,9 @@ dataloader:
         waveform_key: waveform
         melspectrogram_key: log_melspectrogram
         sample_rate: ${data.audio.sample_rate}
-        max_duration: 240
-        chunk_duration: 5
-        hop_duration: 5
-        pad_duration: 0
+        duration: 15
+        full_duration: 240
+        num_chunks: 48
         decode_audio_as_waveform: true
         decode_audio_as_monoral: true
         append_end_time_to_filename: true
