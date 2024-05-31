@@ -9,7 +9,7 @@ dataloader:
   test:
     batch_size: 1
     collate_fn:
-      _target_: birdclef2024.utils.data.BirdCLEF2024ChunkingCollator
+      _target_: birdclef2024.utils.data.BirdCLEF2024AudioChunkingCollator
       composer:
         _target_: birdclef2024.utils.data.BirdCLEF2024AudioChunkingComposer
         melspectrogram_transform: ${data.melspectrogram}

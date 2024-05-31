@@ -7,11 +7,11 @@ from audyn.utils.data.birdclef.birdclef2024.collator import (
 from audyn.utils.data.collator import Collator
 from audyn.utils.data.dataset import Composer
 
-from .composer import BirdCLEF2024AudioChunkingComposer
+from .composer import BirdCLEF2024AudioChunkingComposer, BirdCLEF2024SharedAudioComposer
 
 __all__ = [
     "BirdCLEF2024BaselineCollator",
-    "BirdCLEF2024ChunkingCollator",
+    "BirdCLEF2024AudioChunkingCollator",
 ]
 
 
@@ -19,7 +19,7 @@ class BirdCLEF2024BaselineCollator(_BirdCLEF2024BaselineCollator):
     """Alias of audyn.utils.data.birdclef.birdclef2024.collator.BirdCLEF2024BaselineCollator"""
 
 
-class BirdCLEF2024ChunkingCollator(Collator):
+class BirdCLEF2024AudioChunkingCollator(Collator):
     """Collator for BirdCLEF2024, which supports chunking.
 
     This class can be used for inference.
@@ -33,10 +33,12 @@ class BirdCLEF2024ChunkingCollator(Collator):
         waveform_key: str = "waveform",
         melspectrogram_key: str = "melspectrogram",
     ) -> None:
-        if isinstance(composer, BirdCLEF2024AudioChunkingComposer):
+        if isinstance(
+            composer, (BirdCLEF2024AudioChunkingComposer, BirdCLEF2024SharedAudioComposer)
+        ):
             warnings.warn(
-                f"{type(composer)} is not supported by BirdCLEF2024ChunkingCollator, "
-                "which may cause unexpected behavior of chunking.",
+                f"{type(composer)} is not supported by BirdCLEF2024AudioChunkingCollator, "
+                "which may cause unexpected behavior.",
                 stacklevel=2,
             )
 
