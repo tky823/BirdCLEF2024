@@ -247,9 +247,10 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
         waveform_key (str): Key of waveform to add to given sample.
         melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
         sample_rate (int): Target sampling rate. Default: ``32000``.
-        duration (float): Duration of audio to trim or pad. Default: ``5``.
+        duration (float): Duration of audio to trim or pad. Default: ``15``.
         full_duration (float): Duration of full audio without trimming or padding.
             Default: ``240``.
+        num_chunks (int): Number of chunks.
         decode_audio_as_waveform (bool): If ``True``, audio is decoded as waveform
             tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
             waveform tensor and sampling rate. This parameter is given to Composer class.
@@ -270,11 +271,12 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
         audio_key: str,
         sample_rate_key: str,
         filename_key: str = "filename",
-        melspectrogram_key: str = "melspectrogram",
         waveform_key: str = "waveform",
+        melspectrogram_key: str = "melspectrogram",
         sample_rate: int = 32000,
-        duration: float = 5,
+        duration: float = 15,
         full_duration: float = 240,
+        num_chunks: float = 48,
         decode_audio_as_waveform: bool = True,
         decode_audio_as_monoral: bool = True,
         append_end_time_to_filename: bool = True,
@@ -291,8 +293,8 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
             audio_key,
             sample_rate_key,
             filename_key=filename_key,
-            melspectrogram_key=melspectrogram_key,
             waveform_key=waveform_key,
+            melspectrogram_key=melspectrogram_key,
             sample_rate=sample_rate,
             duration=duration,
             decode_audio_as_waveform=decode_audio_as_waveform,
@@ -301,13 +303,15 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
         )
 
         self.full_duration = full_duration
+        self.num_chunks = num_chunks
         self.append_end_time_to_filename = append_end_time_to_filename
 
     def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         filename_key = self.filename_key
-        duration = self.duration
         full_duration = self.full_duration
-        num_chunks = math.ceil(full_duration / duration)
+        num_chunks = self.num_chunks
+
+        hop_duration = full_duration / num_chunks
 
         sample = super().process(sample)
 
@@ -317,7 +321,7 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
 
         for chunk_idx in range(num_chunks):
             if self.append_end_time_to_filename:
-                end = (chunk_idx + 1) * duration
+                end = (chunk_idx + 1) * hop_duration
                 filenames.append(f"{filename}_{end}")
             else:
                 filenames.append(filename)
