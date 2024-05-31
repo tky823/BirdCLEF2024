@@ -157,6 +157,7 @@ class SharedAudioGenerator(BaseGenerator):
 
             for key, filename in key_mapping.output.items():
                 output = named_output[key]
+                output = output[0]
 
                 if transforms is not None and transforms.output is not None:
                     if key in transforms.output.keys():
@@ -178,6 +179,7 @@ class SharedAudioGenerator(BaseGenerator):
 
             for key, filename in key_mapping.reference.items():
                 reference = named_reference[key]
+                reference = reference[0]
 
                 if transforms is not None and transforms.reference is not None:
                     if key in transforms.reference.keys():
