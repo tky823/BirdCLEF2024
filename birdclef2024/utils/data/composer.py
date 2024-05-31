@@ -64,7 +64,7 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
 
     .. note::
 
-        ``birdclef2024.utils.data.BirdCLEF2024ChunkingCollator`` is expected
+        ``birdclef2024.utils.data.BirdCLEF2024AudioChunkingCollator`` is expected
         to be used as collator.
 
     .. note::
@@ -235,3 +235,93 @@ class BirdCLEF2024AudioChunkingComposer(Composer):
         }
 
         return output
+
+
+class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
+    """Composer to include audio of BirdCLEF2024.
+
+    Args:
+        audio_key (str): Key of audio.
+        sample_rate_key (str): Key of sampling rate.
+        filename_key (str): Key of filename in given sample.
+        waveform_key (str): Key of waveform to add to given sample.
+        melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
+        sample_rate (int): Target sampling rate. Default: ``32000``.
+        duration (float): Duration of audio to trim or pad. Default: ``5``.
+        full_duration (float): Duration of full audio without trimming or padding.
+            Default: ``240``.
+        decode_audio_as_waveform (bool): If ``True``, audio is decoded as waveform
+            tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
+            waveform tensor and sampling rate. This parameter is given to Composer class.
+            When composer is specified, this parameter is not used. Default: ``True``.
+        decode_audio_as_monoral (bool): If ``True``, decoded audio is treated as
+            monoral waveform of shape (num_samples,) by reducing channel dimension. Otherwise,
+            shape of waveform is (num_channels, num_samples), which is returned by
+            ``torchaudio.load``. When composer is specified, this parameter is not used.
+            Default: ``True``.
+        append_end_time_to_filename (bool): If ``True``, end time is appended to filename
+            as suffix.
+
+    """
+
+    def __init__(
+        self,
+        melspectrogram_transform: Union[aT.MelSpectrogram, nn.Module],
+        audio_key: str,
+        sample_rate_key: str,
+        filename_key: str = "filename",
+        melspectrogram_key: str = "melspectrogram",
+        waveform_key: str = "waveform",
+        sample_rate: int = 32000,
+        duration: float = 5,
+        full_duration: float = 240,
+        decode_audio_as_waveform: bool = True,
+        decode_audio_as_monoral: bool = True,
+        append_end_time_to_filename: bool = True,
+        training: bool = True,
+    ) -> None:
+        if duration is None:
+            raise ValueError(
+                "Unlike BirdCLEF2024AudioComposer, BirdCLEF2024SharedAudioComposer always "
+                "requires duration."
+            )
+
+        super().__init__(
+            melspectrogram_transform,
+            audio_key,
+            sample_rate_key,
+            filename_key=filename_key,
+            melspectrogram_key=melspectrogram_key,
+            waveform_key=waveform_key,
+            sample_rate=sample_rate,
+            duration=duration,
+            decode_audio_as_waveform=decode_audio_as_waveform,
+            decode_audio_as_monoral=decode_audio_as_monoral,
+            training=training,
+        )
+
+        self.full_duration = full_duration
+        self.append_end_time_to_filename = append_end_time_to_filename
+
+    def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        filename_key = self.filename_key
+        duration = self.duration
+        full_duration = self.full_duration
+        num_chunks = math.ceil(full_duration / duration)
+
+        sample = super().process(sample)
+
+        # filename
+        filename = sample[filename_key]
+        filenames = []
+
+        for chunk_idx in range(num_chunks):
+            if self.append_end_time_to_filename:
+                end = (chunk_idx + 1) * duration
+                filenames.append(f"{filename}_{end}")
+            else:
+                filenames.append(filename)
+
+        sample[filename_key] = filenames
+
+        return sample
