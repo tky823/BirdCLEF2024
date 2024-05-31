@@ -314,7 +314,7 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
         full_duration = self.full_duration
         num_chunks = self.num_chunks
 
-        hop_duration = full_duration / num_chunks
+        hop_duration = int(full_duration / num_chunks)
 
         sample = super().process(sample)
 
