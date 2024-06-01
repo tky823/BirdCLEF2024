@@ -1,0 +1,26 @@
+# Cross entropy for multi-class estimation in BirdCLEF2024.
+# Both hard and soft label are supported.
+
+_target_: audyn.criterion.MultiCriteria
+cross_entropy:
+  _target_: audyn.criterion.BaseCriterionWrapper
+  criterion:
+    _target_: torch.nn.CrossEntropyLoss
+    reduction: mean
+  weight: 1
+  key_mapping:
+    estimated:
+      input: labeled_student_logit
+    target:
+      target: ${train.dataloader.train.collate_fn.composer.label_index_key}
+knowledge_distillation:
+  _target_: audyn.criterion.BaseCriterionWrapper
+  criterion:
+    _target_: torch.nn.CrossEntropyLoss
+    reduction: mean
+  weight: 1
+  key_mapping:
+    estimated:
+      input: unlabeled_student_logit
+      target: unlabeled_teacher_logit
+    target:

@@ -1,0 +1,102 @@
+defaults:
+  - defaults
+  - _self_
+
+trainer:
+  _target_: birdclef2024.utils.driver.BaseTrainer
+
+dataloader:
+  train:
+    batch_size: 64
+    collate_fn:
+      _target_: birdclef2024.utils.data.BirdCLEF2024BaselineCollator
+      composer:
+        _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDistillationComposer
+        melspectrogram_transform: ${data.melspectrogram}
+        labeled_audio_key: labeled_audio
+        labeled_sample_rate_key: labeled_sample_rate
+        label_name_key: label_name
+        labeled_filename_key: labeled_filename
+        unlabeled_audio_key: unlabeled_audio
+        unlabeled_sample_rate_key: unlabeled_sample_rate
+        unlabeled_filename_key: unlabeled_filename
+        labeled_waveform_key: labeled_waveform
+        labeled_melspectrogram_key: labeled_melspectrogram
+        label_index_key: label_index
+        unlabeled_waveform_key: unlabeled_waveform
+        unlabeled_melspectrogram_key: unlabeled_melspectrogram
+        sample_rate: ${data.audio.sample_rate}
+        duration: ${data.audio.duration}
+        decode_audio_as_waveform: true
+        decode_audio_as_monoral: true
+        training: true
+      melspectrogram_key: ${.composer.melspectrogram_key}
+      label_index_key: ${.composer.label_index_key}
+      alpha: 0.4
+  validation:
+    batch_size: 64
+    collate_fn:
+      _target_: ${...train.collate_fn._target_}
+      composer:
+        _target_: ${....train.collate_fn.composer._target_}
+        melspectrogram_transform: ${....train.collate_fn.composer.melspectrogram_transform}
+        labeled_audio_key: ${....train.collate_fn.composer.labeled_audio_key}
+        labeled_sample_rate_key: ${....train.collate_fn.composer.labeled_sample_rate_key}
+        label_name_key: ${....train.collate_fn.composer.label_name_key}
+        labeled_filename_key: ${....train.collate_fn.composer.labeled_filename_key}
+        unlabeled_audio_key: ${....train.collate_fn.composer.unlabeled_audio_key}
+        unlabeled_sample_rate_key: ${....train.collate_fn.composer.unlabeled_sample_rate_key}
+        unlabeled_filename_key: ${....train.collate_fn.composer.unlabeled_filename_key}
+        labeled_waveform_key: ${....train.collate_fn.composer.labeled_waveform_key}
+        labeled_melspectrogram_key: ${....train.collate_fn.composer.labeled_melspectrogram_key}
+        label_index_key: ${....train.collate_fn.composer.label_index_key}
+        unlabeled_waveform_key: ${....train.collate_fn.composer.unlabeled_waveform_key}
+        unlabeled_melspectrogram_key: ${....train.collate_fn.composer.unlabeled_melspectrogram_key}
+        sample_rate: ${....train.collate_fn.composer.sample_rate}
+        duration: ${....train.collate_fn.composer.duration}
+        decode_audio_as_waveform: ${....train.collate_fn.composer.decode_audio_as_waveform}
+        decode_audio_as_monoral: ${....train.collate_fn.composer.decode_audio_as_monoral}
+        training: false
+      melspectrogram_key: ${...train.collate_fn.composer.melspectrogram_key}
+      label_index_key: ${...train.collate_fn.composer.label_index_key}
+      alpha: ${...train.collate_fn.alpha}
+
+key_mapping:
+  train:
+    input:
+      labeled_input: ${....dataloader.train.collate_fn.composer.labeled_melspectrogram_key}
+      unlabeled_input: ${....dataloader.train.collate_fn.composer.unlabeled_melspectrogram_key}
+    output:
+      - - unlabeled_teacher_logit
+      - - labeled_student_logit
+        - unlabeled_student_logit
+  validation: ${.train}
+  inference:
+    input:
+      input: ${....dataloader.train.collate_fn.composer.labeled_melspectrogram_key}
+    output: logit
+
+ddp_kwargs:
+
+resume:
+  continue_from:
+
+output:
+  exp_dir: "./exp"
+  tensorboard_dir: "./tensorboard"
+  save_checkpoint:
+    iteration:
+      every: 1000
+      path: ${...exp_dir}/model/iteration{iteration}.pth
+    epoch:
+      every: 1
+      path: ${...exp_dir}/model/epoch{epoch}.pth
+    last:
+      path: ${...exp_dir}/model/last.pth
+    best_epoch:
+      path: ${...exp_dir}/model/best_epoch.pth
+
+steps:
+  epochs: 10
+  iterations:
+  lr_scheduler: epoch
