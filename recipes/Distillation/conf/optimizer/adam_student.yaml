@@ -1,0 +1,5 @@
+- name: adam
+  optimizer:
+    _target_: torch.optim.Adam
+  modules:
+    - student
