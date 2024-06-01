@@ -19,6 +19,7 @@ from torch.nn.modules.utils import _pair
 
 __all__ = [
     "BirdCLEF2024PrimaryLabelComposer",
+    "BirdCLEF2024PrimaryLabelDistillationComposer",
     "BirdCLEF2024AudioComposer",
     "BirdCLEF2024AudioChunkingComposer",
 ]
@@ -26,6 +27,209 @@ __all__ = [
 
 class BirdCLEF2024PrimaryLabelComposer(_BirdCLEF2024PrimaryLabelComposer):
     """Alias of audyn.utils.data.birdclef.birdclef2024.composer.BirdCLEF2024PrimaryLabelComposer."""  # noqa: E501
+
+
+class BirdCLEF2024PrimaryLabelDistillationComposer(Composer):
+    """Composer to include primary label of BirdCLEF.
+
+    This class is expected to be used for knowledge distillation.
+
+    Args:
+        primary_labels (list): Primary labels.
+        audio_key (str): Key of audio.
+        sample_rate_key (str): Key of sampling rate.
+        label_name_key (str): Key of prmary label name in given sample.
+        filename_key (str): Key of filename in given sample.
+        waveform_key (str): Key of waveform to add to given sample.
+        melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
+        label_index_key (str): Key of prmary label index to add to given sample.
+        sample_rate (int): Target sampling rate. Default: ``32000``.
+        duration (float, optional): Duration of audio to trim or pad. Default: ``15``.
+        decode_audio_as_waveform (bool): If ``True``, audio is decoded as waveform
+            tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
+            waveform tensor and sampling rate. This parameter is given to Composer class.
+            When composer is specified, this parameter is not used. Default: ``True``.
+        decode_audio_as_monoral (bool): If ``True``, decoded audio is treated as
+            monoral waveform of shape (num_samples,) by reducing channel dimension. Otherwise,
+            shape of waveform is (num_channels, num_samples), which is returned by
+            ``torchaudio.load``. When composer is specified, this parameter is not used.
+            Default: ``True``.
+
+    """
+
+    def __init__(
+        self,
+        melspectrogram_transform: Union[
+            aT.MelSpectrogram,
+            nn.Module,
+        ],
+        labeled_audio_key: str,
+        labeled_sample_rate_key: str,
+        label_name_key: str,
+        labeled_filename_key: str,
+        unlabeled_audio_key: str,
+        unlabeled_sample_rate_key: str,
+        unlabeled_filename_key: str,
+        labeled_waveform_key: str = "labeled_waveform",
+        labeled_melspectrogram_key: str = "labeled_melspectrogram",
+        label_index_key: str = "label_index",
+        unlabeled_waveform_key: str = "unlabeled_waveform",
+        unlabeled_melspectrogram_key: str = "unlabeled_melspectrogram",
+        sample_rate: int = 32000,
+        duration: Optional[float] = 15,
+        decode_audio_as_waveform: bool = True,
+        decode_audio_as_monoral: bool = True,
+        training: bool = True,
+    ) -> None:
+        super().__init__(
+            decode_audio_as_waveform=decode_audio_as_waveform,
+            decode_audio_as_monoral=decode_audio_as_monoral,
+        )
+
+        self.melspectrogram_transform = melspectrogram_transform
+
+        self.labeled_audio_key = labeled_audio_key
+        self.labeled_sample_rate_key = labeled_sample_rate_key
+        self.label_name_key = label_name_key
+        self.labeled_filename_key = labeled_filename_key
+        self.unlabeled_audio_key = unlabeled_audio_key
+        self.unlabeled_sample_rate_key = unlabeled_sample_rate_key
+        self.unlabeled_filename_key = unlabeled_filename_key
+        self.labeled_waveform_key = labeled_waveform_key
+        self.labeled_melspectrogram_key = labeled_melspectrogram_key
+        self.label_index_key = label_index_key
+        self.unlabeled_waveform_key = unlabeled_waveform_key
+        self.unlabeled_melspectrogram_key = unlabeled_melspectrogram_key
+
+        self.primary_labels = birdclef2024_primary_labels
+        self.sample_rate = sample_rate
+        self.duration = duration
+        self.training = training
+
+        assert hasattr(self.melspectrogram_transform, "train")
+        assert callable(self.melspectrogram_transform.train)
+        assert hasattr(self.melspectrogram_transform, "eval")
+        assert callable(self.melspectrogram_transform.eval)
+
+        if self.training:
+            self.melspectrogram_transform.train()
+        else:
+            self.melspectrogram_transform.eval()
+
+    def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        labeled_audio_key = self.labeled_audio_key
+        labeled_sample_rate_key = self.labeled_sample_rate_key
+        label_name_key = self.label_name_key
+        labeled_filename_key = self.labeled_filename_key
+        unlabeled_audio_key = self.unlabeled_audio_key
+        unlabeled_sample_rate_key = self.unlabeled_sample_rate_key
+        unlabeled_filename_key = self.unlabeled_filename_key
+        labeled_waveform_key = self.labeled_waveform_key
+        labeled_melspectrogram_key = self.labeled_melspectrogram_key
+        label_index_key = self.label_index_key
+        unlabeled_waveform_key = self.unlabeled_waveform_key
+        unlabeled_melspectrogram_key = self.unlabeled_melspectrogram_key
+        target_sample_rate = self.sample_rate
+
+        sample = super().process(sample)
+
+        labeled_audio = sample[labeled_audio_key]
+        labeled_sample_rate = sample[labeled_sample_rate_key]
+        labeled_sample_rate_dtype = sample[labeled_sample_rate_key].dtype
+        labeled_sample_rate = labeled_sample_rate.item()
+        unlabeled_audio = sample[unlabeled_audio_key]
+        unlabeled_sample_rate = sample[unlabeled_sample_rate_key]
+        unlabeled_sample_rate_dtype = sample[unlabeled_sample_rate_key].dtype
+        unlabeled_sample_rate = unlabeled_sample_rate.item()
+
+        assert isinstance(
+            labeled_audio, torch.Tensor
+        ), f"{type(unlabeled_audio)} is not supported."
+        assert isinstance(
+            unlabeled_audio, torch.Tensor
+        ), f"{type(unlabeled_audio)} is not supported."
+
+        if labeled_sample_rate != target_sample_rate:
+            labeled_audio = aF.resample(labeled_audio, labeled_sample_rate, target_sample_rate)
+            labeled_sample_rate = target_sample_rate
+            sample[labeled_sample_rate_key] = torch.full(
+                (), fill_value=labeled_sample_rate, dtype=labeled_sample_rate_dtype
+            )
+
+        if unlabeled_sample_rate != target_sample_rate:
+            unlabeled_audio = aF.resample(
+                unlabeled_audio, unlabeled_sample_rate, target_sample_rate
+            )
+            unlabeled_sample_rate = target_sample_rate
+            sample[unlabeled_sample_rate_key] = torch.full(
+                (), fill_value=unlabeled_sample_rate, dtype=unlabeled_sample_rate_dtype
+            )
+
+        labeled_audio = self.slice_audio_if_necessary(
+            labeled_audio, sample_rate=labeled_sample_rate
+        )
+        unlabeled_audio = self.slice_audio_if_necessary(
+            unlabeled_audio, sample_rate=unlabeled_sample_rate
+        )
+
+        label_name = sample[label_name_key]
+        label_index = self.primary_labels.index(label_name)
+        label_index = torch.full((), fill_value=label_index, dtype=torch.long)
+
+        labeled_melspectrogram = self.melspectrogram_transform(labeled_audio)
+        unlabeled_melspectrogram = self.melspectrogram_transform(unlabeled_audio)
+
+        output = {
+            labeled_waveform_key: labeled_audio,
+            labeled_melspectrogram_key: labeled_melspectrogram,
+            label_index_key: label_index,
+            labeled_filename_key: sample[labeled_filename_key],
+            unlabeled_waveform_key: unlabeled_audio,
+            unlabeled_melspectrogram_key: unlabeled_melspectrogram,
+            unlabeled_filename_key: sample[unlabeled_filename_key],
+        }
+
+        return output
+
+    def slice_audio_if_necessary(
+        self,
+        audio: torch.Tensor,
+        sample_rate: Optional[int] = None,
+    ) -> torch.Tensor:
+        duration = self.duration
+
+        if sample_rate is None:
+            sample_rate = self.sample_rate
+
+        if duration is not None:
+            length = int(sample_rate * duration)
+            padding = length - audio.size(-1)
+
+            if padding > 0:
+                if self.training:
+                    padding_left = torch.randint(0, padding, ()).item()
+                else:
+                    padding_left = padding // 2
+
+                padding_right = padding - padding_left
+            elif padding < 0:
+                padding = -padding
+
+                if self.training:
+                    padding_left = torch.randint(0, padding, ()).item()
+                else:
+                    padding_left = padding // 2
+
+                padding_right = padding - padding_left
+                padding_left = -padding_left
+                padding_right = -padding_right
+            else:
+                padding_left = 0
+                padding_right = 0
+
+            audio = F.pad(audio, (padding_left, padding_right))
+
+        return audio
 
 
 class BirdCLEF2024AudioComposer(_BirdCLEF2024AudioComposer):
