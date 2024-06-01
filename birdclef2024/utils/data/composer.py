@@ -35,14 +35,19 @@ class BirdCLEF2024PrimaryLabelDistillationComposer(Composer):
     This class is expected to be used for knowledge distillation.
 
     Args:
-        primary_labels (list): Primary labels.
-        audio_key (str): Key of audio.
-        sample_rate_key (str): Key of sampling rate.
+        labeled_audio_key (str): Key of audio for labeled audio.
+        labeled_sample_rate_key (str): Key of sampling rate for labeled audio.
         label_name_key (str): Key of prmary label name in given sample.
-        filename_key (str): Key of filename in given sample.
-        waveform_key (str): Key of waveform to add to given sample.
-        melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
+        labeled_filename_key (str): Key of filename in given sample for labeled audio.
+        unlabeled_audio_key (str): Key of unlabeled audio.
+        unlabeled_sample_rate_key (str): Key of sampling rate for unlabeled audio.
+        unlabeled_filename_key (str): Key of filename in given sample for unlabeled audio.
+        labeled_waveform_key (str): Key of waveform to add to given sample.
+        labeled_melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
         label_index_key (str): Key of prmary label index to add to given sample.
+        unlabeled_waveform_key (str): Key of waveform to add to given sample for unlabeled audio.
+        unlabeled_melspectrogram_key (str): Key of Mel-spectrogram to add to given sample
+            for unlabeled audio.
         sample_rate (int): Target sampling rate. Default: ``32000``.
         duration (float, optional): Duration of audio to trim or pad. Default: ``15``.
         decode_audio_as_waveform (bool): If ``True``, audio is decoded as waveform
