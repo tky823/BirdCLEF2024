@@ -22,7 +22,7 @@ dump_format="birdclef2024"
 system="defaults"
 preprocess="birdclef2024"
 data="birdclef2024"
-train="birdclef2024distillation"
+train="birdclef2024distillation_birdclef2024"
 test="defaults"
 model="birdclef2024distillation"
 optimizer="adam_student"
@@ -60,7 +60,7 @@ fi
 
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "Stage 1: Train EfficientNet"
+    echo "Stage 1: Train student EfficientNet"
 
     (
         . ./train.sh \
