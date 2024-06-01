@@ -7,6 +7,8 @@ tensorboard_root="./tensorboard"
 
 tag=""
 continue_from=""
+teacher_checkpoint=""
+student_checkpoint=""
 
 dump_format="birdclef2024"
 
@@ -71,5 +73,7 @@ train.dataset.validation.labeled_list_path="${validation_labeled_list_path}" \
 train.dataset.validation.unlabeled_list_path="${validation_unlabeled_list_path}" \
 train.dataset.validation.feature_dir="${validation_feature_dir}" \
 train.resume.continue_from="${continue_from}" \
+train.checkpoint.teacher="${teacher_checkpoint}" \
+train.checkpoint.student="${student_checkpoint}" \
 train.output.exp_dir="${exp_dir}" \
 train.output.tensorboard_dir="${tensorboard_dir}"

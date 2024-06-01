@@ -8,7 +8,9 @@ stop_stage=-1
 
 tag=""
 continue_from=""
-checkpoint=""
+teacher_student_checkpoint=""
+teacher_checkpoint=""
+student_checkpoint=""
 submission_path=""
 
 exp_root="./exp"
@@ -66,6 +68,8 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
         . ./train.sh \
         --tag "${tag}" \
         --continue-from "${continue_from}" \
+        --teacher-checkpoint "${teacher_checkpoint}" \
+        --student-checkpoint "${student_checkpoint}" \
         --exp-root "${exp_root}" \
         --tensorboard-root "${tensorboard_root}" \
         --data-root "${data_root}" \
@@ -103,7 +107,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     (
         . ./test.sh \
         --tag "${tag}" \
-        --checkpoint "${checkpoint}" \
+        --teacher-student-checkpoint "${teacher_student_checkpoint}" \
         --exp-root "${exp_root}" \
         --data-root "${data_root}" \
         --dump-root "${dump_root}" \
