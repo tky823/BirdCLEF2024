@@ -1,0 +1,12 @@
+defaults:
+  - birdclef2024baseline_shared
+  - _self_
+
+dataloader:
+  test:
+    batch_size: 1
+    collate_fn:
+      composer:
+        duration: 10
+        full_duration: 240
+        num_chunks: 48
