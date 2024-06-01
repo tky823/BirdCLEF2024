@@ -15,7 +15,7 @@ dataloader:
         melspectrogram_transform: ${data.melspectrogram}
         labeled_audio_key: labeled_audio
         labeled_sample_rate_key: labeled_sample_rate
-        label_name_key: label_name
+        label_name_key: primary_label
         labeled_filename_key: labeled_filename
         unlabeled_audio_key: unlabeled_audio
         unlabeled_sample_rate_key: unlabeled_sample_rate
@@ -30,7 +30,7 @@ dataloader:
         decode_audio_as_waveform: true
         decode_audio_as_monoral: true
         training: true
-      melspectrogram_key: ${.composer.melspectrogram_key}
+      melspectrogram_key: ${.composer.labeled_melspectrogram_key}
       label_index_key: ${.composer.label_index_key}
       alpha: 0.4
   validation:
@@ -57,7 +57,7 @@ dataloader:
         decode_audio_as_waveform: ${....train.collate_fn.composer.decode_audio_as_waveform}
         decode_audio_as_monoral: ${....train.collate_fn.composer.decode_audio_as_monoral}
         training: false
-      melspectrogram_key: ${...train.collate_fn.composer.melspectrogram_key}
+      melspectrogram_key: ${...train.collate_fn.composer.labeled_melspectrogram_key}
       label_index_key: ${...train.collate_fn.composer.label_index_key}
       alpha: ${...train.collate_fn.alpha}
 

@@ -14,7 +14,8 @@ train:
 
 validation:
   _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDistillationDataset
-  list_path:
+  labeled_list_path:
+  unlabeled_list_path:
   feature_dir:
   labeled_audio_key: ${..train.labeled_audio_key}
   labeled_sample_rate_key: ${..train.labeled_sample_rate_key}
