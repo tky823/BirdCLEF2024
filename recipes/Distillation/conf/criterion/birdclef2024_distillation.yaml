@@ -16,7 +16,8 @@ cross_entropy:
 knowledge_distillation:
   _target_: audyn.criterion.BaseCriterionWrapper
   criterion:
-    _target_: torch.nn.CrossEntropyLoss
+    _target_: birdclef2024.criterion.distillation.DistillationCrossEntropyLoss
+    is_logit_target: true
     reduction: mean
   weight: 1
   key_mapping:
