@@ -62,7 +62,7 @@ dump_format="birdclef2024"
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_weighted_birdclef2024"
-test="birdclef2024ast_birdclef2024"  # or "birdclef2024baseline_shared_birdclef2024"
+test="birdclef2024ast_birdclef2024"  # or "birdclef2024ast_shared_birdclef2024"
 
 . ./run.sh \
 --stage 2 \
@@ -93,7 +93,7 @@ dump_format="birdclef2024"
 # NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_weighted_birdclef2024"
-test="birdclef2024ast_birdclef2024"  # or "birdclef2024baseline_shared_birdclef2024"
+test="birdclef2024ast_birdclef2024"  # or "birdclef2024ast_shared_birdclef2024"
 model="birdclef2024ast"
 
 . ./run.sh \
@@ -125,7 +125,7 @@ dump_format="birdclef2024"
 # NOTE: "train" and "test" configs depend on "dump_format".
 data="birdclef2024ast"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
-test="birdclef2024ast_birdclef2024"
+test="birdclef2024ast_birdclef2024"  # or "birdclef2024ast_shared_birdclef2024"
 model="birdclef2024ast"
 
 . ./run.sh \
