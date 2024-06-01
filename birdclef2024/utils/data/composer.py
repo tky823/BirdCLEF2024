@@ -329,7 +329,9 @@ class BirdCLEF2024VadBasedAudioComposer(BirdCLEF2024AudioComposer):
         melspectrogram_key: str = "melspectrogram",
         waveform_key: str = "waveform",
         sample_rate: int = 32000,
-        duration: float | None = 15,
+        duration: float = 15,
+        vad_f_min: Optional[float] = None,
+        vad_f_max: Optional[float] = None,
         decode_audio_as_waveform: bool = True,
         decode_audio_as_monoral: bool = True,
         training: bool = True,
@@ -348,12 +350,27 @@ class BirdCLEF2024VadBasedAudioComposer(BirdCLEF2024AudioComposer):
             training=training,
         )
 
+        self.vad_f_min = vad_f_min
+        self.vad_f_max = vad_f_max
+
     def slice_audio_if_necessary(
         self,
         audio: torch.Tensor,
         sample_rate: Optional[int] = None,
     ) -> torch.Tensor:
         duration = self.duration
+        f_min = self.vad_f_min
+        f_max = self.vad_f_max
+
+        if f_min is None:
+            normalized_f_min = 0
+        else:
+            normalized_f_min = f_min / (sample_rate / 2)
+
+        if f_max is None:
+            normalized_f_max = 1
+        else:
+            normalized_f_max = f_max / (sample_rate / 2)
 
         if duration is None:
             raise ValueError(
@@ -386,7 +403,13 @@ class BirdCLEF2024VadBasedAudioComposer(BirdCLEF2024AudioComposer):
             audio = F.unfold(audio, kernel_size=(1, length), stride=(1, length // 2))
             audio = audio.view(*batch_shape, -1, length)
             window = torch.hann_window(length)
+            n_bins = length // 2 + 1
+            min_bin_idx = int(n_bins * normalized_f_min)
+            max_bin_idx = int(n_bins * normalized_f_max)
             spectrogram = torch.fft.rfft(window * audio, dim=-1)
+            _, spectrogram, _ = torch.split(
+                spectrogram, [min_bin_idx, max_bin_idx - min_bin_idx, n_bins - max_bin_idx], dim=-1
+            )
             spectrogram = torch.abs(spectrogram)
             power = torch.mean(spectrogram**2, dim=-1)
             max_idx = torch.argmax(power, dim=-1)
@@ -746,6 +769,8 @@ class BirdCLEF2024VadBasedSharedAudioComposer(BirdCLEF2024VadBasedAudioComposer)
         duration: float = 15,
         full_duration: float = 240,
         num_chunks: float = 48,
+        vad_f_min: Optional[float] = None,
+        vad_f_max: Optional[float] = None,
         decode_audio_as_waveform: bool = True,
         decode_audio_as_monoral: bool = True,
         append_end_time_to_filename: bool = True,
@@ -760,6 +785,8 @@ class BirdCLEF2024VadBasedSharedAudioComposer(BirdCLEF2024VadBasedAudioComposer)
             waveform_key=waveform_key,
             sample_rate=sample_rate,
             duration=duration,
+            vad_f_min=vad_f_min,
+            vad_f_max=vad_f_max,
             decode_audio_as_waveform=decode_audio_as_waveform,
             decode_audio_as_monoral=decode_audio_as_monoral,
             training=training,
