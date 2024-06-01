@@ -63,7 +63,7 @@ dump_format="birdclef2024"
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
-model="birdclef2024baseline"
+model="birdclef2024baseline"  # or "birdclef2024b7"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
 criterion="birdclef2024"
@@ -127,7 +127,7 @@ dump_format="birdclef2024"
 data="birdclef2024"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 test="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_15sec", "birdclef2024baseline_shared_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024baseline"  # or "birdclef2024b7"
 
 . ./run.sh \
 --stage 3 \
@@ -159,7 +159,7 @@ dump_format="birdclef2024"
 data="birdclef2024"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
 test="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_15sec", "birdclef2024baseline_shared_birdclef2024"
-model="birdclef2024baseline"
+model="birdclef2024baseline"  # or "birdclef2024b7"
 
 . ./run.sh \
 --stage 4 \
