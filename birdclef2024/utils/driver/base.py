@@ -9,9 +9,8 @@ from audyn.utils.driver._decorator import run_only_master_rank
 from huggingface_hub import HfApi
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig
-from tqdm import tqdm
 
-from ..kaggle import load_huggingface_repo_id, load_huggingface_token
+from ..kaggle import is_on_kaggle, load_huggingface_repo_id, load_huggingface_token
 
 _token = load_huggingface_token()
 _repo_id = load_huggingface_repo_id()
@@ -92,6 +91,11 @@ class BaseGenerator(_BaseGenerator):
         key_mapping = test_config.key_mapping.inference
 
         self.model.eval()
+
+        if is_on_kaggle():
+            from tqdm.notebook import tqdm
+        else:
+            from tqdm import tqdm
 
         for named_data in tqdm(self.loader):
             named_data = self.move_data_to_device(named_data, self.device)
