@@ -22,6 +22,8 @@ dataloader:
         duration: 15
         full_duration: 240
         num_chunks: 48
+        vad_f_min:
+        vad_f_max:
         decode_audio_as_waveform: true
         decode_audio_as_monoral: true
         append_end_time_to_filename: true
