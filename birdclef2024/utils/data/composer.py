@@ -240,6 +240,164 @@ class BirdCLEF2024PrimaryLabelDistillationComposer(Composer):
 class BirdCLEF2024AudioComposer(_BirdCLEF2024AudioComposer):
     """Alias of audyn.utils.data.birdclef.birdclef2024.composer.BirdCLEF2024AudioComposer."""
 
+    def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        audio_key = self.audio_key
+        sample_rate_key = self.sample_rate_key
+        filename_key = self.filename_key
+        waveform_key = self.waveform_key
+        melspectrogram_key = self.melspectrogram_key
+        target_sample_rate = self.sample_rate
+
+        sample = super(_BirdCLEF2024AudioComposer, self).process(sample)
+
+        audio = sample[audio_key]
+        sample_rate = sample[sample_rate_key]
+        sample_rate_dtype = sample[sample_rate_key].dtype
+        sample_rate = sample_rate.item()
+
+        assert isinstance(audio, torch.Tensor), f"{type(audio)} is not supported."
+
+        if sample_rate != target_sample_rate:
+            audio = aF.resample(audio, sample_rate, target_sample_rate)
+            sample_rate = target_sample_rate
+            sample[sample_rate_key] = torch.full(
+                (), fill_value=sample_rate, dtype=sample_rate_dtype
+            )
+
+        audio = self.slice_audio_if_necessary(audio, sample_rate=sample_rate)
+        melspectrogram = self.melspectrogram_transform(audio)
+
+        output = {
+            waveform_key: audio,
+            melspectrogram_key: melspectrogram,
+            sample_rate_key: sample[sample_rate_key],
+            filename_key: sample[filename_key],
+        }
+
+        return output
+
+    def slice_audio_if_necessary(
+        self,
+        audio: torch.Tensor,
+        sample_rate: Optional[int] = None,
+    ) -> torch.Tensor:
+        duration = self.duration
+
+        if duration is not None:
+            length = int(sample_rate * duration)
+            padding = length - audio.size(-1)
+
+            if padding > 0:
+                if self.training:
+                    padding_left = torch.randint(0, padding, ()).item()
+                else:
+                    padding_left = padding // 2
+
+                padding_right = padding - padding_left
+            elif padding < 0:
+                padding = -padding
+
+                if self.training:
+                    padding_left = torch.randint(0, padding, ()).item()
+                else:
+                    padding_left = padding // 2
+
+                padding_right = padding - padding_left
+                padding_left = -padding_left
+                padding_right = -padding_right
+            else:
+                padding_left = 0
+                padding_right = 0
+
+            audio = F.pad(audio, (padding_left, padding_right))
+
+        return audio
+
+
+class BirdCLEF2024VadBasedAudioComposer(BirdCLEF2024AudioComposer):
+    """Vad-based audio composer.
+
+    Extract only activated frame.
+    """
+
+    def __init__(
+        self,
+        melspectrogram_transform: Union[aT.MelSpectrogram, nn.Module],
+        audio_key: str,
+        sample_rate_key: str,
+        filename_key: str = "filename",
+        melspectrogram_key: str = "melspectrogram",
+        waveform_key: str = "waveform",
+        sample_rate: int = 32000,
+        duration: float | None = 15,
+        decode_audio_as_waveform: bool = True,
+        decode_audio_as_monoral: bool = True,
+        training: bool = True,
+    ) -> None:
+        super().__init__(
+            melspectrogram_transform,
+            audio_key,
+            sample_rate_key,
+            filename_key=filename_key,
+            waveform_key=waveform_key,
+            melspectrogram_key=melspectrogram_key,
+            sample_rate=sample_rate,
+            duration=duration,
+            decode_audio_as_waveform=decode_audio_as_waveform,
+            decode_audio_as_monoral=decode_audio_as_monoral,
+            training=training,
+        )
+
+    def slice_audio_if_necessary(
+        self,
+        audio: torch.Tensor,
+        sample_rate: Optional[int] = None,
+    ) -> torch.Tensor:
+        duration = self.duration
+
+        if duration is None:
+            raise ValueError(
+                "When duration is None, it is recommended to use BirdCLEF2024AudioComposer."
+            )
+
+        length = int(sample_rate * duration)
+        padding = length - audio.size(-1)
+
+        if padding > 0:
+            if self.training:
+                padding_left = torch.randint(0, padding, ()).item()
+            else:
+                padding_left = padding // 2
+
+            padding_right = padding - padding_left
+            audio = F.pad(audio, (padding_left, padding_right))
+        elif padding < 0:
+            additional_padding = (length - audio.size(-1) % length) % length
+
+            if additional_padding > 0 and self.training:
+                additional_padding_left = torch.randint(0, additional_padding, ()).item()
+            else:
+                additional_padding_left = additional_padding // 2
+
+            additional_padding_right = additional_padding - additional_padding_left
+            audio = F.pad(audio, (additional_padding_left, additional_padding_right))
+            *batch_shape, audio_length = audio.size()
+            audio = audio.view(-1, 1, 1, audio_length)
+            audio = F.unfold(audio, kernel_size=(1, length), stride=(1, length // 2))
+            audio = audio.view(*batch_shape, -1, length)
+            window = torch.hann_window(length)
+            spectrogram = torch.fft.rfft(window * audio, dim=-1)
+            spectrogram = torch.abs(spectrogram)
+            power = torch.mean(spectrogram**2, dim=-1)
+            max_idx = torch.argmax(power, dim=-1)
+
+            if not self.decode_audio_as_monoral:
+                raise ValueError("Only decode_audio_as_monoral=True is supported.")
+
+            audio = audio[max_idx]
+
+        return audio
+
 
 class BirdCLEF2024AudioChunkingComposer(Composer):
     """Composer for BirdCLEF2024, which supports chunking.
@@ -511,6 +669,101 @@ class BirdCLEF2024SharedAudioComposer(BirdCLEF2024AudioComposer):
             training=training,
         )
 
+        self.full_duration = full_duration
+        self.num_chunks = num_chunks
+        self.append_end_time_to_filename = append_end_time_to_filename
+
+    def process(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        sample_rate_key = self.sample_rate_key
+        filename_key = self.filename_key
+        waveform_key = self.waveform_key
+        melspectrogram_key = self.melspectrogram_key
+        full_duration = self.full_duration
+        num_chunks = self.num_chunks
+
+        hop_duration = int(full_duration / num_chunks)
+
+        sample = super().process(sample)
+
+        # audio
+        sample[waveform_key] = sample[waveform_key].unsqueeze(dim=0)
+        sample[melspectrogram_key] = sample[melspectrogram_key].unsqueeze(dim=0)
+        sample[sample_rate_key] = sample[sample_rate_key].unsqueeze(dim=0)
+
+        # filename
+        filename = sample[filename_key]
+        filenames = []
+
+        for chunk_idx in range(num_chunks):
+            if self.append_end_time_to_filename:
+                end = (chunk_idx + 1) * hop_duration
+                filenames.append(f"{filename}_{end}")
+            else:
+                filenames.append(filename)
+
+        sample[filename_key] = filenames
+
+        return sample
+
+
+class BirdCLEF2024VadBasedSharedAudioComposer(BirdCLEF2024VadBasedAudioComposer):
+    """Composer to include audio of BirdCLEF2024.
+
+    Args:
+        audio_key (str): Key of audio.
+        sample_rate_key (str): Key of sampling rate.
+        filename_key (str): Key of filename in given sample.
+        waveform_key (str): Key of waveform to add to given sample.
+        melspectrogram_key (str): Key of Mel-spectrogram to add to given sample.
+        sample_rate (int): Target sampling rate. Default: ``32000``.
+        duration (float): Duration of audio to trim or pad. Default: ``15``.
+        full_duration (float): Duration of full audio without trimming or padding.
+            Default: ``240``.
+        num_chunks (int): Number of chunks.
+        decode_audio_as_waveform (bool): If ``True``, audio is decoded as waveform
+            tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
+            waveform tensor and sampling rate. This parameter is given to Composer class.
+            When composer is specified, this parameter is not used. Default: ``True``.
+        decode_audio_as_monoral (bool): If ``True``, decoded audio is treated as
+            monoral waveform of shape (num_samples,) by reducing channel dimension. Otherwise,
+            shape of waveform is (num_channels, num_samples), which is returned by
+            ``torchaudio.load``. When composer is specified, this parameter is not used.
+            Default: ``True``.
+        append_end_time_to_filename (bool): If ``True``, end time is appended to filename
+            as suffix.
+
+    """
+
+    def __init__(
+        self,
+        melspectrogram_transform: Union[aT.MelSpectrogram, nn.Module],
+        audio_key: str,
+        sample_rate_key: str,
+        filename_key: str = "filename",
+        waveform_key: str = "waveform",
+        melspectrogram_key: str = "melspectrogram",
+        sample_rate: int = 32000,
+        duration: float = 15,
+        full_duration: float = 240,
+        num_chunks: float = 48,
+        decode_audio_as_waveform: bool = True,
+        decode_audio_as_monoral: bool = True,
+        append_end_time_to_filename: bool = True,
+        training: bool = True,
+    ) -> None:
+        super().__init__(
+            melspectrogram_transform,
+            audio_key,
+            sample_rate_key,
+            filename_key=filename_key,
+            melspectrogram_key=melspectrogram_key,
+            waveform_key=waveform_key,
+            sample_rate=sample_rate,
+            duration=duration,
+            decode_audio_as_waveform=decode_audio_as_waveform,
+            decode_audio_as_monoral=decode_audio_as_monoral,
+            training=training,
+        )
         self.full_duration = full_duration
         self.num_chunks = num_chunks
         self.append_end_time_to_filename = append_end_time_to_filename
