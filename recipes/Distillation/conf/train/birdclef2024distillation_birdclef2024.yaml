@@ -1,0 +1,4 @@
+defaults:
+  - birdclef2024distillation
+  - override dataset: birdclef2024distillation
+  - _self_
