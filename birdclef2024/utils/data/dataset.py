@@ -12,7 +12,7 @@ from audyn.utils.data.birdclef.birdclef2024.dataset import (
 from audyn.utils.data.birdclef.birdclef2024.dataset import (
     BirdCLEF2024PrimaryLabelDataset as _BirdCLEF2024PrimaryLabelDataset,
 )
-from torch.utils.data import IterableDataset, get_worker_info
+from torch.utils.data import Dataset, IterableDataset, get_worker_info
 
 from .sampler import BirdCLEF2024WeightedRandomSampler
 
@@ -20,6 +20,7 @@ __all__ = [
     "BirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024AudioDataset",
     "WeightedBirdCLEF2024PrimaryLabelDataset",
+    "BirdCLEF2024PrimaryLabelDistillationDataset",
 ]
 
 
@@ -266,3 +267,178 @@ class WeightedBirdCLEF2024PrimaryLabelDataset(IterableDataset):
             smooth=smooth,
             filenames=filenames,
         )
+
+
+class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
+    """Dataset for training of bird classification model.
+
+    Args:
+        labeled_list_path (str): Path to list file with known primary label. Each entry represents
+            path to audio file without extension such as ``abethr1/XC128013``.
+        unlabeled_list_path (str): Path to list file with unknown primary label. Each entry
+            represents path to audio file without extension such as ``460830``.
+        feature_dir (str): Path to dataset containing ``train_metadata.csv`` file,
+            ``train_audio`` directory, and so on.
+        labeled_audio_key (str): Key of labeled audio.
+        labeled_sample_rate_key (str): Key of sampling rate of labeled audio.
+        label_name_key (str): Key of prmary label name in given sample.
+        labeled_filename_key (str): Key of filename of labeled audio in given sample.
+        unlabeled_audio_key (str): Key of unlabeled audio.
+        unlabeled_sample_rate_key (str): Key of sampling rate of unlabeled audio.
+        unlabeled_filename_key (str): Key of filename of unlabeled audio in given sample.
+        seed (int): Random seed to sample unlabeled audio.
+        decode_audio_as_waveform (bool, optional): If ``True``, audio is decoded as waveform
+            tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
+            waveform tensor and sampling rate. Default: ``True``.
+        decode_audio_as_monoral (bool, optional): If ``True``, decoded audio is treated as
+            monoral waveform of shape (num_samples,) by reducing channel dimension. Otherwise,
+            shape of waveform is (num_channels, num_samples), which is returned by
+            ``torchaudio.load``. Default: ``True``.
+
+    """
+
+    def __init__(
+        self,
+        labeled_list_path: str,
+        unlabeled_list_path: str,
+        feature_dir: str,
+        labeled_audio_key: str = "labeled_audio",
+        labeled_sample_rate_key: str = "labeled_sample_rate",
+        label_name_key: str = "primary_label",
+        labeled_filename_key: str = "labeled_filename",
+        unlabeled_audio_key: str = "unlabeled_audio",
+        unlabeled_sample_rate_key: str = "unlabeled_sample_rate",
+        unlabeled_filename_key: str = "unlabeled_filename",
+        seed: int = 0,
+        decode_audio_as_waveform: Optional[bool] = None,
+        decode_audio_as_monoral: Optional[bool] = None,
+    ) -> None:
+        super().__init__()
+
+        labeled_audio_root = os.path.join(feature_dir, "train_audio")
+        unlabeled_audio_root = os.path.join(feature_dir, "unlabeled_soundscapes")
+        csv_path = os.path.join(feature_dir, "train_metadata.csv")
+
+        self.labeled_audio_root = labeled_audio_root
+        self.unlabeled_audio_root = unlabeled_audio_root
+        self.csv_path = csv_path
+        self.labeled_list_path = labeled_list_path
+        self.unlabeled_list_path = unlabeled_list_path
+
+        self.labeled_audio_key = labeled_audio_key
+        self.labeled_sample_rate_key = labeled_sample_rate_key
+        self.label_name_key = label_name_key
+        self.labeled_filename_key = labeled_filename_key
+        self.unlabeled_audio_key = unlabeled_audio_key
+        self.unlabeled_sample_rate_key = unlabeled_sample_rate_key
+        self.unlabeled_filename_key = unlabeled_filename_key
+
+        self.seed = seed
+        self.generator = None
+
+        if decode_audio_as_waveform is None:
+            decode_audio_as_waveform = True
+
+        if decode_audio_as_monoral is None:
+            decode_audio_as_monoral = True
+
+        self.decode_audio_as_waveform = decode_audio_as_waveform
+        self.decode_audio_as_monoral = decode_audio_as_monoral
+
+        labeled_filenames = []
+        unlabeled_filenames = []
+        primary_label_mapping = {}
+
+        with open(labeled_list_path) as f:
+            for line in f:
+                filename = line.strip()
+                labeled_filenames.append(filename)
+
+        with open(unlabeled_list_path) as f:
+            for line in f:
+                filename = line.strip()
+                unlabeled_filenames.append(filename)
+
+        with open(csv_path) as f:
+            reader = csv.reader(f)
+
+            for idx, line in enumerate(reader):
+                if idx < 1:
+                    continue
+
+                data = decode_csv_line(line)
+                filename = data["filename"]
+
+                if filename in labeled_filenames:
+                    primary_label = data["primary_label"]
+                    primary_label_mapping[filename] = primary_label
+
+        self.labeled_filenames = labeled_filenames
+        self.unlabeled_filenames = unlabeled_filenames
+        self.primary_label_mapping = primary_label_mapping
+
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
+        labeled_audio_root = self.labeled_audio_root
+        labeled_filename = self.labeled_filenames[idx]
+        primary_label_mapping = self.primary_label_mapping
+
+        unlabeled_audio_root = self.unlabeled_audio_root
+
+        if self.generator is None:
+            # should be initialized
+            worker_info = get_worker_info()
+
+            if worker_info is None:
+                worker_id = 0
+            else:
+                worker_id = worker_info.id
+
+            self.generator = torch.Generator()
+            self.generator.manual_seed(self.seed + worker_id)
+
+        idx = torch.randint(0, len(self.unlabeled_filenames), ()).item()
+        unlabeled_filename = self.unlabeled_filenames[idx]
+
+        # labeled
+        audio_path = os.path.join(labeled_audio_root, f"{labeled_filename}.ogg")
+        waveform, sample_rate = torchaudio.load(audio_path)
+
+        if self.decode_audio_as_monoral:
+            waveform = waveform.mean(dim=0)
+
+        if self.decode_audio_as_waveform:
+            labeled_audio = waveform
+        else:
+            labeled_audio = waveform, sample_rate
+
+        labeled_sample_rate = torch.tensor(sample_rate, dtype=torch.long)
+        primary_label = primary_label_mapping[labeled_filename]
+
+        # unlabeled
+        audio_path = os.path.join(unlabeled_audio_root, f"{unlabeled_filename}.ogg")
+        waveform, sample_rate = torchaudio.load(audio_path)
+
+        if self.decode_audio_as_monoral:
+            waveform = waveform.mean(dim=0)
+
+        if self.decode_audio_as_waveform:
+            unlabeled_audio = waveform
+        else:
+            unlabeled_audio = waveform, sample_rate
+
+        unlabeled_sample_rate = torch.tensor(sample_rate, dtype=torch.long)
+
+        feature = {
+            self.labeled_audio_key: labeled_audio,
+            self.labeled_sample_rate_key: labeled_sample_rate,
+            self.label_name_key: primary_label,
+            self.labeled_filename_key: labeled_filename,
+            self.unlabeled_audio_key: unlabeled_audio,
+            self.unlabeled_sample_rate_key: unlabeled_sample_rate,
+            self.unlabeled_filename_key: unlabeled_filename,
+        }
+
+        return feature
+
+    def __len__(self) -> int:
+        return len(self.labeled_filenames)

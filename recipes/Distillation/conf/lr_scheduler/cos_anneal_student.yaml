@@ -1,0 +1,8 @@
+- name: adam
+  lr_scheduler:
+    _target_: birdclef2024.optim.lr_scheduler.LinearWarmupCosineAnnealingLR
+    warmup_steps: 3
+    suspend_steps: 0
+    cooldown_steps: 10
+    initial_lr: 5.0e-5
+    eta_min: 1.0e-5

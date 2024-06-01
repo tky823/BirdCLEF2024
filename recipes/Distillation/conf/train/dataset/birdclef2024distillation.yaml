@@ -1,0 +1,27 @@
+train:
+  _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDistillationDataset
+  labeled_list_path:
+  unlabeled_list_path:
+  feature_dir:
+  labeled_audio_key: labeled_audio
+  labeled_sample_rate_key: labeled_sample_rate
+  label_name_key: primary_label
+  labeled_filename_key: labeled_filename
+  unlabeled_audio_key: unlabeled_audio
+  unlabeled_sample_rate_key: unlabeled_sample_rate
+  unlabeled_filename_key: unlabeled_filename
+  seed: ${system.seed}
+
+validation:
+  _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDistillationDataset
+  labeled_list_path:
+  unlabeled_list_path:
+  feature_dir:
+  labeled_audio_key: ${..train.labeled_audio_key}
+  labeled_sample_rate_key: ${..train.labeled_sample_rate_key}
+  label_name_key: ${..train.label_name_key}
+  labeled_filename_key: ${..train.labeled_filename_key}
+  unlabeled_audio_key: ${..train.unlabeled_audio_key}
+  unlabeled_sample_rate_key: ${..train.unlabeled_sample_rate_key}
+  unlabeled_filename_key: ${..train.unlabeled_filename_key}
+  seed: ${..train.seed}
