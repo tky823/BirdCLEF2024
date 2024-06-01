@@ -9,6 +9,7 @@ except ImportError:
 __all__ = [
     "load_huggingface_token",
     "load_huggingface_repo_id",
+    "is_on_kaggle",
 ]
 
 
@@ -46,3 +47,7 @@ def load_huggingface_repo_id() -> Optional[str]:
         repo_id = os.getenv("HUGGINGFACE_REPO_ID")
 
     return repo_id
+
+
+def is_on_kaggle() -> bool:
+    return "KAGGLE_KERNEL_RUN_TYPE" in os.environ
