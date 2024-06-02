@@ -5,6 +5,7 @@ from .composer import (
     BirdCLEF2024PrimaryLabelComposer,
     BirdCLEF2024PrimaryLabelDistillationComposer,
     BirdCLEF2024SharedAudioComposer,
+    BirdCLEF2024VadBasedSharedAudioComposer,
 )
 from .dataset import (
     BirdCLEF2024AudioDataset,
@@ -25,6 +26,7 @@ __all__ = [
     "BirdCLEF2024AudioComposer",
     "BirdCLEF2024AudioChunkingComposer",
     "BirdCLEF2024SharedAudioComposer",
+    "BirdCLEF2024VadBasedSharedAudioComposer",
     "BirdCLEF2024BaselineCollator",
     "BirdCLEF2024AudioChunkingCollator",
 ]
