@@ -7,7 +7,11 @@ from audyn.utils.data.birdclef.birdclef2024.collator import (
 from audyn.utils.data.collator import Collator
 from audyn.utils.data.dataset import Composer
 
-from .composer import BirdCLEF2024AudioChunkingComposer, BirdCLEF2024SharedAudioComposer
+from .composer import (
+    BirdCLEF2024AudioChunkingComposer,
+    BirdCLEF2024SharedAudioComposer,
+    BirdCLEF2024VadBasedSharedAudioComposer,
+)
 
 __all__ = [
     "BirdCLEF2024BaselineCollator",
@@ -34,7 +38,12 @@ class BirdCLEF2024AudioChunkingCollator(Collator):
         melspectrogram_key: str = "melspectrogram",
     ) -> None:
         if isinstance(
-            composer, (BirdCLEF2024AudioChunkingComposer, BirdCLEF2024SharedAudioComposer)
+            composer,
+            (
+                BirdCLEF2024AudioChunkingComposer,
+                BirdCLEF2024SharedAudioComposer,
+                BirdCLEF2024VadBasedSharedAudioComposer,
+            ),
         ):
             warnings.warn(
                 f"{type(composer)} is not supported by BirdCLEF2024AudioChunkingCollator, "
