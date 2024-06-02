@@ -10,7 +10,12 @@ from huggingface_hub import HfApi
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig
 
-from ..kaggle import is_on_kaggle, load_huggingface_repo_id, load_huggingface_token
+from ..kaggle import (
+    is_on_kaggle,
+    load_huggingface_repo_id,
+    load_huggingface_token,
+    requires_huggingface_token,
+)
 
 _token = load_huggingface_token()
 _repo_id = load_huggingface_repo_id()
@@ -25,9 +30,10 @@ class BaseTrainer(_BaseTrainer):
     def save_checkpoint(self, save_path: str) -> None:
         super().save_checkpoint(save_path)
 
-        self.upload_checkpoint(save_path)
-        self.upload_tensorboard(self.writer.log_dir)
-        self.upload_log(HydraConfig.get().run.dir)
+        if self.huggingface_api.token is not None or not requires_huggingface_token():
+            self.upload_checkpoint(save_path)
+            self.upload_tensorboard(self.writer.log_dir)
+            self.upload_log(HydraConfig.get().run.dir)
 
     def upload_checkpoint(self, path: str) -> None:
         cwd = os.getcwd()

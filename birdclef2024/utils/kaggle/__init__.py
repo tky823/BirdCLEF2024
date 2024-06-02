@@ -28,6 +28,9 @@ def load_huggingface_token() -> Optional[str]:
     if token is None:
         token = os.getenv("HUGGINGFACE_TOKEN")
 
+    if token is not None and len(token) == 0:
+        token = None
+
     return token
 
 
@@ -46,7 +49,31 @@ def load_huggingface_repo_id() -> Optional[str]:
     if repo_id is None:
         repo_id = os.getenv("HUGGINGFACE_REPO_ID")
 
+    if repo_id is not None and len(repo_id) == 0:
+        repo_id = None
+
     return repo_id
+
+
+def requires_huggingface_token() -> bool:
+    token = None
+
+    if UserSecretsClient is not None:
+        user_secrets = UserSecretsClient()
+
+        try:
+            token = user_secrets.get_secret("REQUIRES_HUGGINGFACE_TOKEN")
+        except Exception:
+            # if HUGGINGFACE_TOKEN is not defined
+            pass
+
+    if token is None:
+        token = os.getenv("REQUIRES_HUGGINGFACE_TOKEN")
+
+    if token is None:
+        return True
+
+    return bool(int(token))
 
 
 def is_on_kaggle() -> bool:
