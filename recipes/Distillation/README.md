@@ -53,6 +53,8 @@ To train student model, run the following command:
 ```sh
 tag=<TAG>
 
+teacher_checkpoint=<PATH/TO/TRAINED/TEACHER/MODEL>
+
 # "../data" is used by default
 # On kaggle environment, "/kaggle/input"
 data_root=<PATH/TO/ROOT/OF/DATA>
@@ -72,6 +74,7 @@ criterion="birdclef2024_distillation"
 --stage 1 \
 --stop-stage 1 \
 --tag "${tag}" \
+--teacher-checkpoint "${teacher_checkpoint}" \
 --data-root "${data_root}" \
 --dump-format "${dump_format}" \
 --data "${data}" \

@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 trainer:
-  _target_: birdclef2024.utils.driver.BaseTrainer
+  _target_: birdclef2024.utils.driver.StudentTrainer
 
 dataloader:
   train:
@@ -77,6 +77,10 @@ key_mapping:
     output: logit
 
 ddp_kwargs:
+
+checkpoint:
+  teacher: ???
+  student:
 
 resume:
   continue_from:

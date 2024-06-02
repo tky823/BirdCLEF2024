@@ -1,0 +1,3 @@
+_target_: birdclef2024.models.baseline.LargeBaselineModel
+weights: ${const:torchvision.models.EfficientNet_B7_Weights.IMAGENET1K_V1}
+num_classes: ${const:audyn.utils.data.birdclef.birdclef2024.num_primary_labels}
