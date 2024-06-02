@@ -37,7 +37,7 @@ class BirdCLEF2024AudioChunkingCollator(Collator):
         waveform_key: str = "waveform",
         melspectrogram_key: str = "melspectrogram",
     ) -> None:
-        if isinstance(
+        if not isinstance(
             composer,
             (
                 BirdCLEF2024AudioChunkingComposer,
