@@ -18,6 +18,7 @@ from .dataset import (
     BirdCLEF2024AudioDataset,
     BirdCLEF2024PrimaryLabelDataset,
     BirdCLEF2024PrimaryLabelDistillationDataset,
+    BirdCLEF2024PrimaryLabelMultiDataset,
     WeightedBirdCLEF2024PrimaryLabelDataset,
 )
 from .sampler import BirdCLEF2024WeightedRandomSampler
@@ -27,6 +28,7 @@ __all__ = [
     "BirdCLEF2024AudioDataset",
     "WeightedBirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024PrimaryLabelDistillationDataset",
+    "BirdCLEF2024PrimaryLabelMultiDataset",
     "BirdCLEF2024WeightedRandomSampler",
     "BirdCLEF2024PrimaryLabelComposer",
     "BirdCLEF2024PrimaryLabelDistillationComposer",
@@ -75,13 +77,13 @@ def decode_csv_line(
         if len(line) == 12:
             version = 2023
         elif len(line) == 13:
-            version = 2022
+            version = 2021
         else:
             raise ValueError("Invalid format of line is detected.")
 
     version = int(version)
 
-    if version == 2022:
+    if version in [2021, 2022]:
         (
             primary_label,
             secondary_labels,
