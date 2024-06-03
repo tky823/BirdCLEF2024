@@ -1,0 +1,4 @@
+defaults:
+  - birdclef2024baseline
+  - override dataset: multi-birdclef2024
+  - _self_
