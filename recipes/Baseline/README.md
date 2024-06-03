@@ -63,7 +63,7 @@ dump_format="birdclef2024"
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024"
 train="birdclef2024baseline_birdclef2024"  # or "birdclef2024baseline_birdclef2024_weighted"
-model="birdclef2024baseline"  # or "birdclef2024b7"
+model="birdclef2024baseline"  # or "birdclef2024b0", "birdclef2024b7"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
 criterion="birdclef2024"
