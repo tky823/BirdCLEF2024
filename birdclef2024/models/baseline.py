@@ -1,9 +1,12 @@
+import os
 from typing import Optional
 
 import torch
 import torch.nn as nn
+from audyn.utils import instantiate_model
 from audyn.utils.data.birdclef.birdclef2024 import num_primary_labels
 from audyn.utils.data.birdclef.birdclef2024.models.baseline import BaselineModel as _BaselineModel
+from omegaconf import OmegaConf
 from torchvision.models import (
     EfficientNet_B0_Weights,
     EfficientNet_B7_Weights,
@@ -20,6 +23,35 @@ __all__ = [
 
 class BaselineModel(_BaselineModel):
     """Wrapper class of _BaselineModel in audyn."""
+
+    @classmethod
+    def build_from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str,
+        num_classes: Optional[int] = None,
+    ) -> "BaselineModel":
+        path = pretrained_model_name_or_path
+
+        if os.path.exists(path):
+            state_dict = torch.load(path, map_location=lambda storage, loc: storage)
+            model_state_dict = state_dict["model"]
+            resolved_config = state_dict["resolved_config"]
+            resolved_config = OmegaConf.create(resolved_config)
+            model: BaselineModel = instantiate_model(resolved_config.model)
+            model.load_state_dict(model_state_dict)
+
+            dropout: nn.Dropout = model.classifier[0]
+            linear: nn.Linear = model.classifier[-1]
+
+            if num_classes is not None and linear.out_features != num_classes:
+                model.classifier = nn.Sequential(
+                    nn.Dropout(p=dropout.p),
+                    nn.Linear(linear.in_features, num_classes),
+                )
+        else:
+            raise FileNotFoundError(f"{path} is not found.")
+
+        return model
 
 
 class SmallBaselineModel(nn.Module):
