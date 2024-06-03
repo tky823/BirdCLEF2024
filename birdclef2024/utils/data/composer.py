@@ -22,7 +22,10 @@ __all__ = [
     "BeforeBirdCLEF2024PrimaryLabelComposer",
     "BirdCLEF2024PrimaryLabelDistillationComposer",
     "BirdCLEF2024AudioComposer",
+    "BirdCLEF2024VadBasedAudioComposer",
     "BirdCLEF2024AudioChunkingComposer",
+    "BirdCLEF2024SharedAudioComposer",
+    "BirdCLEF2024VadBasedSharedAudioComposer",
 ]
 
 
