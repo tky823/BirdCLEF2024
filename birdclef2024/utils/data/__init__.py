@@ -44,7 +44,8 @@ __all__ = [
     "before_birdclef2024_primary_labels",
     "num_before_birdclef2024_primary_labels",
     "decode_csv_line",
-    "select_birdclef2024_samples",
+    "select_seen_class_samples",
+    "select_unseen_samples",
 ]
 
 before_birdclef2024_primary_labels = download_before_birdclef2024_primary_labels()
@@ -158,13 +159,13 @@ def decode_csv_line(
     return data
 
 
-def select_birdclef2024_samples(
+def select_seen_class_samples(
     path: str,
     existing_list_path: Optional[str] = None,
     train_list_path: Optional[str] = None,
     validation_list_path: Optional[str] = None,
 ) -> List[str]:
-    """Split dataset into training and validation.
+    """Select samples from seen class.
 
     Args:
         path (str): Path to csv file.
@@ -214,5 +215,62 @@ def select_birdclef2024_samples(
                     pass
                 else:
                     filenames.append(_filename)
+
+    return filenames
+
+
+def select_unseen_samples(
+    path: str,
+    existing_list_path: Optional[str] = None,
+    train_list_path: Optional[str] = None,
+    validation_list_path: Optional[str] = None,
+) -> List[str]:
+    """Select unseen samples.
+
+    Args:
+        path (str): Path to csv file.
+
+    Returns:
+        list: Selected filenames.
+
+    """
+    existing_filenames = set()
+
+    if existing_list_path is not None and os.path.exists(existing_list_path):
+        with open(existing_list_path) as f:
+            for line in f:
+                filename = line.strip()
+                existing_filenames.add(filename)
+
+    if train_list_path is not None:
+        with open(train_list_path) as f:
+            for line in f:
+                filename = line.strip()
+                existing_filenames.add(filename)
+
+    if validation_list_path is not None:
+        with open(validation_list_path) as f:
+            for line in f:
+                filename = line.strip()
+                existing_filenames.add(filename)
+
+    filenames = []
+
+    with open(path) as f:
+        reader = csv.reader(f)
+
+        for idx, line in enumerate(reader):
+            if idx < 1:
+                continue
+
+            *_, filename = line
+            _filename, _ = os.path.splitext(filename)
+
+            if _filename in existing_filenames:
+                # If given sample is included in existing_filenames,
+                # then skip it to avoid data leakage and duplicates.
+                pass
+            else:
+                filenames.append(_filename)
 
     return filenames
