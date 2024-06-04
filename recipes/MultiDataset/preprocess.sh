@@ -14,12 +14,12 @@ data="birdclef2021+2022+2023+2024"
 . ../_common/parse_options.sh || exit 1;
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "Preprocess stage 1: Preprocess dataset"
+    echo "Preprocess stage 1: Preprocess dataset for training"
 
     (
         . ./preprocess_2024.sh \
         --stage 1 \
-        --stop-stage 4 \
+        --stop-stage 3 \
         --data-root "${data_root}" \
         --dump-root "${dump_root}" \
         --dump-format "${dump_format}" \
@@ -80,6 +80,21 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         . ./unify_datasets.sh \
         --stage 1 \
         --stop-stage 2 \
+        --data-root "${data_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --preprocess "${preprocess}" \
+        --data "${data}"
+    )
+fi
+
+if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
+    echo "Preprocess stage 6: Preprocess dataset for evaluation"
+
+    (
+        . ./preprocess_2024.sh \
+        --stage 4 \
+        --stop-stage 4 \
         --data-root "${data_root}" \
         --dump-root "${dump_root}" \
         --dump-format "${dump_format}" \

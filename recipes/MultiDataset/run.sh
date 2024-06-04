@@ -80,3 +80,58 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
         --criterion "${criterion}"
     )
 fi
+
+
+if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
+    echo "Stage 2: Preprocess test dataset"
+
+    (
+        . ./preprocess.sh \
+        --stage 6 \
+        --stop-stage 6 \
+        --data-root "${data_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --preprocess "${preprocess}" \
+        --data "${data}"
+    )
+fi
+
+if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
+    echo "Stage 3: Infer by EfficientNet"
+
+    (
+        . ./test.sh \
+        --tag "${tag}" \
+        --checkpoint "${checkpoint}" \
+        --exp-root "${exp_root}" \
+        --data-root "${data_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --system "${system}" \
+        --preprocess "${preprocess}" \
+        --data "${data}" \
+        --train "${train}" \
+        --test "${test}" \
+        --model "${model}"
+    )
+fi
+
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "Stage 4: Submit estimation."
+
+    (
+        . ./submit.sh \
+        --tag "${tag}" \
+        --submission-path "${submission_path}" \
+        --exp-root "${exp_root}" \
+        --dump-root "${dump_root}" \
+        --dump-format "${dump_format}" \
+        --system "${system}" \
+        --preprocess "${preprocess}" \
+        --data "${data}" \
+        --train "${train}" \
+        --test "${test}" \
+        --model "${model}"
+    )
+fi
