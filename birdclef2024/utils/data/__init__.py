@@ -1,8 +1,9 @@
 import ast
 import csv
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import torch
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels as birdclef2024_primary_labels
 
 from ._download import download_birdclef2024_pretrain_primary_labels
@@ -46,6 +47,8 @@ __all__ = [
     "decode_csv_line",
     "select_seen_class_samples",
     "select_unseen_samples",
+    "stratified_split",
+    "stratified_split_2024",
 ]
 
 birdclef2024_pretrain_primary_labels = download_birdclef2024_pretrain_primary_labels()
@@ -274,3 +277,81 @@ def select_unseen_samples(
                 filenames.append(_filename)
 
     return filenames
+
+
+def stratified_split(
+    primary_labels: List[str],
+    path: str,
+    train_ratio: float,
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Split dataset into training and validation.
+
+    Args:
+        path (str): Path to csv file.
+        train_ratio (float): Ratio of training set.
+        seed (int): Random seed.
+
+    Returns:
+        tuple: Splits of filenames.
+
+            - list: List of training filenames.
+            - list: List of validation filenames.
+
+    """
+    g = torch.Generator()
+    g.manual_seed(seed)
+
+    filenames = {primary_label: [] for primary_label in primary_labels}
+    train_filenames = []
+    validation_filenames = []
+
+    with open(path) as f:
+        reader = csv.reader(f)
+
+        for idx, line in enumerate(reader):
+            if idx < 1:
+                continue
+
+            primary_label, *_, filename = line
+            filenames[primary_label].append(filename)
+
+    # split dataset
+    for primary_label, _filenames in filenames.items():
+        num_files = len(_filenames)
+        indices = torch.randperm(num_files, generator=g).tolist()
+
+        for idx in indices[: int(train_ratio * num_files)]:
+            train_filenames.append(_filenames[idx])
+
+        for idx in indices[int(train_ratio * num_files) :]:
+            validation_filenames.append(_filenames[idx])
+
+    return train_filenames, validation_filenames
+
+
+def stratified_split_2024(
+    path: str,
+    train_ratio: float,
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Split dataset into training and validation.
+
+    Args:
+        path (str): Path to csv file.
+        train_ratio (float): Ratio of training set.
+        seed (int): Random seed.
+
+    Returns:
+        tuple: Splits of filenames.
+
+            - list: List of training filenames.
+            - list: List of validation filenames.
+
+    """
+    return stratified_split(
+        birdclef2024_primary_labels,
+        path,
+        train_ratio=train_ratio,
+        seed=seed,
+    )
