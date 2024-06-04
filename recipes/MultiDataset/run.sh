@@ -21,7 +21,7 @@ dump_format="birdclef2024"
 
 system="defaults"
 preprocess="birdclef2021+2022+2023+2024"
-data="birdclef2021+2022+2023+2024"
+data="birdclef2024"
 train="birdclef2024baseline_multi-birdclef2024"
 test="birdclef2024baseline_birdclef2024"
 model="birdclef2024baseline"
