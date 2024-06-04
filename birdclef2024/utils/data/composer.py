@@ -19,7 +19,7 @@ from torch.nn.modules.utils import _pair
 
 __all__ = [
     "BirdCLEF2024PrimaryLabelComposer",
-    "BeforeBirdCLEF2024PrimaryLabelComposer",
+    "BirdCLEF2024PretrainPrimaryLabelComposer",
     "BirdCLEF2024PrimaryLabelDistillationComposer",
     "BirdCLEF2024AudioComposer",
     "BirdCLEF2024VadBasedAudioComposer",
@@ -33,7 +33,7 @@ class BirdCLEF2024PrimaryLabelComposer(_BirdCLEF2024PrimaryLabelComposer):
     """Alias of audyn.utils.data.birdclef.birdclef2024.composer.BirdCLEF2024PrimaryLabelComposer."""  # noqa: E501
 
 
-class BeforeBirdCLEF2024PrimaryLabelComposer(Composer):
+class BirdCLEF2024PretrainPrimaryLabelComposer(Composer):
     """Composer to include primary labels of BirdCLEF2021-2023.
 
     Args:
