@@ -1,0 +1,3 @@
+_target_: birdclef2024.models.baseline.BaselineModel.build_from_pretrained
+pretrained_model_name_or_path: ${train.checkpoint}
+num_classes: ${const:birdclef2024.utils.data.num_before_birdclef2024_primary_labels}
