@@ -82,7 +82,7 @@ class BirdCLEF2024PretrainPrimaryLabelComposer(Composer):
             decode_audio_as_monoral=decode_audio_as_monoral,
         )
 
-        from . import before_birdclef2024_primary_labels
+        from . import birdclef2024_pretrain_primary_labels
 
         self.melspectrogram_transform = melspectrogram_transform
 
@@ -94,7 +94,7 @@ class BirdCLEF2024PretrainPrimaryLabelComposer(Composer):
         self.melspectrogram_key = melspectrogram_key
         self.label_index_key = label_index_key
 
-        self.primary_labels = before_birdclef2024_primary_labels
+        self.primary_labels = birdclef2024_pretrain_primary_labels
         self.sample_rate = sample_rate
         self.duration = duration
         self.training = training

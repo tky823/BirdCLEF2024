@@ -4,7 +4,7 @@ from typing import List
 from audyn.utils import audyn_cache_dir
 
 
-def download_before_birdclef2024_primary_labels() -> List[str]:
+def download_birdclef2024_pretrain_primary_labels() -> List[str]:
     primary_labels = set()
 
     for year in [2021, 2022, 2023]:

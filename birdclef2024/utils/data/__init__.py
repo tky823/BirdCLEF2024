@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels as birdclef2024_primary_labels
 
-from ._download import download_before_birdclef2024_primary_labels
+from ._download import download_birdclef2024_pretrain_primary_labels
 from .collator import BirdCLEF2024AudioChunkingCollator, BirdCLEF2024BaselineCollator
 from .composer import (
     BirdCLEF2024AudioChunkingComposer,
@@ -41,15 +41,15 @@ __all__ = [
     "BirdCLEF2024VadBasedSharedAudioComposer",
     "BirdCLEF2024BaselineCollator",
     "BirdCLEF2024AudioChunkingCollator",
-    "before_birdclef2024_primary_labels",
-    "num_before_birdclef2024_primary_labels",
+    "birdclef2024_pretrain_primary_labels",
+    "num_birdclef2024_pretrain_primary_labels",
     "decode_csv_line",
     "select_seen_class_samples",
     "select_unseen_samples",
 ]
 
-before_birdclef2024_primary_labels = download_before_birdclef2024_primary_labels()
-num_before_birdclef2024_primary_labels = len(before_birdclef2024_primary_labels)
+birdclef2024_pretrain_primary_labels = download_birdclef2024_pretrain_primary_labels()
+num_before_birdclef2024_primary_labels = len(birdclef2024_pretrain_primary_labels)
 
 
 def decode_csv_line(
