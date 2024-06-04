@@ -20,6 +20,7 @@ __all__ = [
     "BirdCLEF2024AudioDataset",
     "WeightedBirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024PrimaryLabelDistillationDataset",
+    "BirdCLEF2024PrimaryLabelMultiDataset",
 ]
 
 
@@ -448,23 +449,18 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
 
 
 class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
-    """Dataset for training of bird classification model using BirdCLEF2021-2024.
+    """Dataset for training of bird classification model using BirdCLEF2024, BirdCLEF2023,
+    BirdCLEF2022, and BirdCLEF2021.
 
     Args:
-        labeled_list_path (str): Path to list file with known primary label. Each entry represents
-            path to audio file without extension such as ``birdclef-2024/abethr1/XC128013``.
-        unlabeled_list_path (str): Path to list file with unknown primary label. Each entry
-            represents path to audio file without extension such as ``460830``.
+        list_path (str): Path to list file. Each entry represents path to audio file
+            without extension such as ``birdclef-2024/asbfly/XC49755``.
         feature_dir (str): Path to dataset containing ``train_metadata.csv`` file,
             ``train_audio`` directory, and so on.
-        labeled_audio_key (str): Key of labeled audio.
-        labeled_sample_rate_key (str): Key of sampling rate of labeled audio.
+        audio_key (str): Key of audio.
+        sample_rate_key (str): Key of sampling rate.
         label_name_key (str): Key of prmary label name in given sample.
-        labeled_filename_key (str): Key of filename of labeled audio in given sample.
-        unlabeled_audio_key (str): Key of unlabeled audio.
-        unlabeled_sample_rate_key (str): Key of sampling rate of unlabeled audio.
-        unlabeled_filename_key (str): Key of filename of unlabeled audio in given sample.
-        seed (int): Random seed to sample unlabeled audio.
+        filename_key (str): Key of filename in given sample.
         decode_audio_as_waveform (bool, optional): If ``True``, audio is decoded as waveform
             tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
             waveform tensor and sampling rate. Default: ``True``.
