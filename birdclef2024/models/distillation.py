@@ -21,6 +21,10 @@ class TeacherStudentModel(nn.Module):
 
         self.train_teacher = train_teacher
 
+        if not self.train_teacher:
+            for p in self.teacher.parameters():
+                p.requires_grad = False
+
     def train(self, mode: bool = True) -> "TeacherStudentModel":
         if self.train_teacher:
             self.teacher.train(mode=mode)
