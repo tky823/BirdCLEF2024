@@ -59,10 +59,10 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "Stage 1: Train EfficientNet"
+    echo "Stage 1: Pretrain EfficientNet"
 
     (
-        . ./train.sh \
+        . ./pretrain.sh \
         --tag "${tag}" \
         --continue-from "${continue_from}" \
         --exp-root "${exp_root}" \

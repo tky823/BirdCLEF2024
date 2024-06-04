@@ -1,4 +1,4 @@
 defaults:
   - birdclef2024baseline
-  - override dataset: before-birdclef2024
+  - override dataset: pretrain-birdclef2024
   - _self_
