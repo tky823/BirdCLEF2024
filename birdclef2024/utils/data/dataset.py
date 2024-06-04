@@ -449,8 +449,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
 
 
 class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
-    """Dataset for training of bird classification model using BirdCLEF2024, BirdCLEF2023,
-    BirdCLEF2022, and BirdCLEF2021.
+    """Dataset for training of bird classification model using BirdCLEF2021-2024.
 
     Args:
         list_path (str): Path to list file. Each entry represents path to audio file
