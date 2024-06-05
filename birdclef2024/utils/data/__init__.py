@@ -4,6 +4,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
+from audyn.utils import audyn_cache_dir
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels as birdclef2024_primary_labels
 
 from ._download import download_birdclef2024_pretrain_primary_labels
@@ -49,6 +50,9 @@ __all__ = [
     "select_unseen_samples",
     "stratified_split",
     "stratified_split_2024",
+    "stratified_split_2023",
+    "stratified_split_2022",
+    "stratified_split_2021",
 ]
 
 birdclef2024_pretrain_primary_labels = download_birdclef2024_pretrain_primary_labels()
@@ -351,6 +355,117 @@ def stratified_split_2024(
     """
     return stratified_split(
         birdclef2024_primary_labels,
+        path,
+        train_ratio=train_ratio,
+        seed=seed,
+    )
+
+
+def stratified_split_2023(
+    path: str,
+    train_ratio: float,
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Split dataset into training and validation.
+
+    Args:
+        path (str): Path to csv file.
+        train_ratio (float): Ratio of training set.
+        seed (int): Random seed.
+
+    Returns:
+        tuple: Splits of filenames.
+
+            - list: List of training filenames.
+            - list: List of validation filenames.
+
+    """
+    primary_labels = set()
+    path = os.path.join(audyn_cache_dir, "data", "birdclef2023", "primary-labels.txt")
+
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            primary_labels.add(line)
+
+    primary_labels = sorted(list(primary_labels))
+
+    return stratified_split(
+        primary_labels,
+        path,
+        train_ratio=train_ratio,
+        seed=seed,
+    )
+
+
+def stratified_split_2022(
+    path: str,
+    train_ratio: float,
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Split dataset into training and validation.
+
+    Args:
+        path (str): Path to csv file.
+        train_ratio (float): Ratio of training set.
+        seed (int): Random seed.
+
+    Returns:
+        tuple: Splits of filenames.
+
+            - list: List of training filenames.
+            - list: List of validation filenames.
+
+    """
+    primary_labels = set()
+    path = os.path.join(audyn_cache_dir, "data", "birdclef2022", "primary-labels.txt")
+
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            primary_labels.add(line)
+
+    primary_labels = sorted(list(primary_labels))
+
+    return stratified_split(
+        primary_labels,
+        path,
+        train_ratio=train_ratio,
+        seed=seed,
+    )
+
+
+def stratified_split_2021(
+    path: str,
+    train_ratio: float,
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Split dataset into training and validation.
+
+    Args:
+        path (str): Path to csv file.
+        train_ratio (float): Ratio of training set.
+        seed (int): Random seed.
+
+    Returns:
+        tuple: Splits of filenames.
+
+            - list: List of training filenames.
+            - list: List of validation filenames.
+
+    """
+    primary_labels = set()
+    path = os.path.join(audyn_cache_dir, "data", "birdclef2021", "primary-labels.txt")
+
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            primary_labels.add(line)
+
+    primary_labels = sorted(list(primary_labels))
+
+    return stratified_split(
+        primary_labels,
         path,
         train_ratio=train_ratio,
         seed=seed,
