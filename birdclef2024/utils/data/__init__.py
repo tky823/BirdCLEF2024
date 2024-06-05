@@ -56,7 +56,7 @@ __all__ = [
 ]
 
 birdclef2024_pretrain_primary_labels = download_birdclef2024_pretrain_primary_labels()
-num_before_birdclef2024_primary_labels = len(birdclef2024_pretrain_primary_labels)
+num_birdclef2024_pretrain_primary_labels = len(birdclef2024_pretrain_primary_labels)
 
 
 def decode_csv_line(
