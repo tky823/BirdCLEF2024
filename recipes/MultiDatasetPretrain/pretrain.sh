@@ -39,7 +39,7 @@ cmd=$(
     system="${system}"
 )
 
-train_list_path="${list_dir}/additional_train.txt"
+train_list_path="${list_dir}/pretrain.txt"
 validation_list_path="${list_dir}/validation.txt"
 
 if [ "${dump_format}" = "birdclef2024" ]; then
