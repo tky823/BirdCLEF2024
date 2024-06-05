@@ -425,7 +425,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
                 frame_offset = frame_offset.item()
             else:
                 frame_offset = 0
-                num_frames = -1
+                length = -1
 
             waveform, sample_rate = torchaudio.load(
                 audio_path, frame_offset=frame_offset, num_frames=length
@@ -458,7 +458,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
                 frame_offset = frame_offset.item()
             else:
                 frame_offset = 0
-                num_frames = -1
+                length = -1
 
             frame_offset = torch.randint(0, num_frames - length, (), generator=g)
             frame_offset = frame_offset.item()
