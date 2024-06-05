@@ -39,8 +39,8 @@ cmd=$(
     system="${system}"
 )
 
-train_list_path="${list_dir}/pretrain.txt"
-validation_list_path="${list_dir}/validation.txt"
+train_list_path="${list_dir}/pretrain_train.txt"
+validation_list_path="${list_dir}/pretrain_validation.txt"
 
 if [ "${dump_format}" = "birdclef2024" ]; then
     if [ "${data}" = "birdclef2021+2022+2023+2024" ]; then
