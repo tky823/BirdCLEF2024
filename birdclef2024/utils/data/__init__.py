@@ -112,12 +112,13 @@ def decode_csv_line(
             common_name,
             _,
             _,
-            path,
+            filename,
             _,
             rating,
             _,
             _,
         ) = line
+        path = os.path.join(primary_label, filename)
     elif version == 2022:
         (
             primary_label,
