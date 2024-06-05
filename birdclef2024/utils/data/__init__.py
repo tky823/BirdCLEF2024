@@ -409,9 +409,11 @@ def stratified_split_unseen_samples_2023(
 
     """
     primary_labels = set()
-    path = os.path.join(audyn_cache_dir, "data", "birdclef2023", "primary-labels.txt")
+    primary_labels_path = os.path.join(
+        audyn_cache_dir, "data", "birdclef2023", "primary-labels.txt"
+    )
 
-    with open(path) as f:
+    with open(primary_labels_path) as f:
         for line in f:
             line = line.strip()
             primary_labels.add(line)
@@ -454,14 +456,14 @@ def stratified_split_unseen_samples_2022(
 
     """
     primary_labels = set()
-    path = os.path.join(audyn_cache_dir, "data", "birdclef2022", "primary-labels.txt")
+    primary_labels_path = os.path.join(
+        audyn_cache_dir, "data", "birdclef2022", "primary-labels.txt"
+    )
 
-    with open(path) as f:
+    with open(primary_labels_path) as f:
         for line in f:
             line = line.strip()
             primary_labels.add(line)
-
-    primary_labels = sorted(list(primary_labels))
 
     train_filenames, validation_filenames = stratified_split_unseen_samples(
         primary_labels,
@@ -499,14 +501,14 @@ def stratified_split_unseen_samples_2021(
 
     """
     primary_labels = set()
-    path = os.path.join(audyn_cache_dir, "data", "birdclef2021", "primary-labels.txt")
+    primary_labels_path = os.path.join(
+        audyn_cache_dir, "data", "birdclef2023", "primary-labels.txt"
+    )
 
-    with open(path) as f:
+    with open(primary_labels_path) as f:
         for line in f:
             line = line.strip()
             primary_labels.add(line)
-
-    primary_labels = sorted(list(primary_labels))
 
     train_filenames, validation_filenames = stratified_split_unseen_samples(
         primary_labels,
