@@ -50,9 +50,9 @@ __all__ = [
     "select_unseen_samples",
     "stratified_split",
     "stratified_split_2024",
-    "stratified_split_2023",
-    "stratified_split_2022",
-    "stratified_split_2021",
+    "stratified_split_unseen_samples_2023",
+    "stratified_split_unseen_samples_2022",
+    "stratified_split_unseen_samples_2021",
 ]
 
 birdclef2024_pretrain_primary_labels = download_birdclef2024_pretrain_primary_labels()
@@ -226,21 +226,34 @@ def select_seen_class_samples(
     return filenames
 
 
-def select_unseen_samples(
+def stratified_split_unseen_samples(
+    primary_labels: List[str],
     path: str,
+    train_ratio: float,
     existing_list_path: Optional[str] = None,
     train_list_path: Optional[str] = None,
     validation_list_path: Optional[str] = None,
-) -> List[str]:
-    """Select unseen samples.
+    seed: int = 0,
+) -> Tuple[List[str], List[str]]:
+    """Select unseen samples and split dataset.
 
     Args:
         path (str): Path to csv file.
 
     Returns:
-        list: Selected filenames.
+        tuple: Tuple of lists.
+
+            - list: Training filenames.
+            - list: Validation filenames.
 
     """
+    g = torch.Generator()
+    g.manual_seed(seed)
+
+    filenames = {primary_label: [] for primary_label in primary_labels}
+    train_filenames = []
+    validation_filenames = []
+
     existing_filenames = set()
 
     if existing_list_path is not None and os.path.exists(existing_list_path):
@@ -270,17 +283,29 @@ def select_unseen_samples(
             if idx < 1:
                 continue
 
-            *_, filename = line
-            _filename, _ = os.path.splitext(filename)
+            primary_label, _, filename = line
+            filename, _ = os.path.splitext(filename)
 
-            if _filename in existing_filenames:
+            if filename in existing_filenames:
                 # If given sample is included in existing_filenames,
                 # then skip it to avoid data leakage and duplicates.
                 pass
             else:
-                filenames.append(_filename)
+                primary_label, *_, filename = line
+                filenames[primary_label].append(filename)
 
-    return filenames
+    # split dataset
+    for primary_label, _filenames in filenames.items():
+        num_files = len(_filenames)
+        indices = torch.randperm(num_files, generator=g).tolist()
+
+        for idx in indices[: int(train_ratio * num_files)]:
+            train_filenames.append(_filenames[idx])
+
+        for idx in indices[int(train_ratio * num_files) :]:
+            validation_filenames.append(_filenames[idx])
+
+    return train_filenames, validation_filenames
 
 
 def stratified_split(
@@ -361,9 +386,12 @@ def stratified_split_2024(
     )
 
 
-def stratified_split_2023(
+def stratified_split_unseen_samples_2023(
     path: str,
     train_ratio: float,
+    existing_list_path: Optional[str] = None,
+    train_list_path: Optional[str] = None,
+    validation_list_path: Optional[str] = None,
     seed: int = 0,
 ) -> Tuple[List[str], List[str]]:
     """Split dataset into training and validation.
@@ -390,17 +418,25 @@ def stratified_split_2023(
 
     primary_labels = sorted(list(primary_labels))
 
-    return stratified_split(
+    train_filenames, validation_filenames = stratified_split_unseen_samples(
         primary_labels,
         path,
         train_ratio=train_ratio,
+        existing_list_path=existing_list_path,
+        train_list_path=train_list_path,
+        validation_list_path=validation_list_path,
         seed=seed,
     )
 
+    return train_filenames, validation_filenames
 
-def stratified_split_2022(
+
+def stratified_split_unseen_samples_2022(
     path: str,
     train_ratio: float,
+    existing_list_path: Optional[str] = None,
+    train_list_path: Optional[str] = None,
+    validation_list_path: Optional[str] = None,
     seed: int = 0,
 ) -> Tuple[List[str], List[str]]:
     """Split dataset into training and validation.
@@ -427,17 +463,25 @@ def stratified_split_2022(
 
     primary_labels = sorted(list(primary_labels))
 
-    return stratified_split(
+    train_filenames, validation_filenames = stratified_split_unseen_samples(
         primary_labels,
         path,
         train_ratio=train_ratio,
+        existing_list_path=existing_list_path,
+        train_list_path=train_list_path,
+        validation_list_path=validation_list_path,
         seed=seed,
     )
 
+    return train_filenames, validation_filenames
 
-def stratified_split_2021(
+
+def stratified_split_unseen_samples_2021(
     path: str,
     train_ratio: float,
+    existing_list_path: Optional[str] = None,
+    train_list_path: Optional[str] = None,
+    validation_list_path: Optional[str] = None,
     seed: int = 0,
 ) -> Tuple[List[str], List[str]]:
     """Split dataset into training and validation.
@@ -464,9 +508,14 @@ def stratified_split_2021(
 
     primary_labels = sorted(list(primary_labels))
 
-    return stratified_split(
+    train_filenames, validation_filenames = stratified_split_unseen_samples(
         primary_labels,
         path,
         train_ratio=train_ratio,
+        existing_list_path=existing_list_path,
+        train_list_path=train_list_path,
+        validation_list_path=validation_list_path,
         seed=seed,
     )
+
+    return train_filenames, validation_filenames
