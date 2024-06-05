@@ -441,6 +441,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
 
         # unlabeled
         audio_path = os.path.join(unlabeled_audio_root, f"{unlabeled_filename}.ogg")
+        metadata = torchaudio.info(audio_path)
 
         if duration is not None:
             sample_rate = metadata.sample_rate
