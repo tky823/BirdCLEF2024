@@ -311,6 +311,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         unlabeled_audio_key: str = "unlabeled_audio",
         unlabeled_sample_rate_key: str = "unlabeled_sample_rate",
         unlabeled_filename_key: str = "unlabeled_filename",
+        duration: Optional[float] = 15,
         seed: int = 0,
         decode_audio_as_waveform: Optional[bool] = None,
         decode_audio_as_monoral: Optional[bool] = None,
@@ -337,6 +338,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         self.unlabeled_sample_rate_key = unlabeled_sample_rate_key
         self.unlabeled_filename_key = unlabeled_filename_key
 
+        self.duration = duration
         self.seed = seed
         self.generator = None
 
@@ -387,6 +389,9 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         primary_label_mapping = self.primary_label_mapping
 
         unlabeled_audio_root = self.unlabeled_audio_root
+        unlabeled_filenames = self.unlabeled_filenames
+
+        duration = self.duration
 
         if self.generator is None:
             # should be initialized
@@ -400,12 +405,28 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
             self.generator = torch.Generator()
             self.generator.manual_seed(self.seed + worker_id)
 
-        idx = torch.randint(0, len(self.unlabeled_filenames), ()).item()
-        unlabeled_filename = self.unlabeled_filenames[idx]
+        g = self.generator
+
+        unlabeled_idx = torch.randint(0, len(unlabeled_filenames), (), generator=g)
+        unlabeled_idx = unlabeled_idx.item()
+        unlabeled_filename = unlabeled_filenames[unlabeled_idx]
 
         # labeled
         audio_path = os.path.join(labeled_audio_root, f"{labeled_filename}.ogg")
-        waveform, sample_rate = torchaudio.load(audio_path)
+        metadata = torchaudio.info(audio_path)
+
+        if duration is not None:
+            sample_rate = metadata.sample_rate
+            num_frames = metadata.num_frames
+            length = int(sample_rate * duration)
+
+            frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+            frame_offset = frame_offset.item()
+            waveform, sample_rate = torchaudio.load(
+                audio_path, frame_offset=frame_offset, num_frames=length
+            )
+        else:
+            waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:
             waveform = waveform.mean(dim=0)
@@ -420,7 +441,19 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
 
         # unlabeled
         audio_path = os.path.join(unlabeled_audio_root, f"{unlabeled_filename}.ogg")
-        waveform, sample_rate = torchaudio.load(audio_path)
+
+        if duration is not None:
+            sample_rate = metadata.sample_rate
+            num_frames = metadata.num_frames
+            length = int(sample_rate * duration)
+
+            frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+            frame_offset = frame_offset.item()
+            waveform, sample_rate = torchaudio.load(
+                audio_path, frame_offset=frame_offset, num_frames=length
+            )
+        else:
+            waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:
             waveform = waveform.mean(dim=0)
