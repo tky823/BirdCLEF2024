@@ -420,8 +420,13 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
             num_frames = metadata.num_frames
             length = int(sample_rate * duration)
 
-            frame_offset = torch.randint(0, num_frames - length, (), generator=g)
-            frame_offset = frame_offset.item()
+            if length < num_frames:
+                frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+                frame_offset = frame_offset.item()
+            else:
+                frame_offset = 0
+                num_frames = -1
+
             waveform, sample_rate = torchaudio.load(
                 audio_path, frame_offset=frame_offset, num_frames=length
             )
@@ -447,6 +452,13 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
             sample_rate = metadata.sample_rate
             num_frames = metadata.num_frames
             length = int(sample_rate * duration)
+
+            if length < num_frames:
+                frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+                frame_offset = frame_offset.item()
+            else:
+                frame_offset = 0
+                num_frames = -1
 
             frame_offset = torch.randint(0, num_frames - length, (), generator=g)
             frame_offset = frame_offset.item()
