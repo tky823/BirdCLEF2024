@@ -5,7 +5,6 @@ import torch
 from audyn.criterion import BaseCriterionWrapper
 from audyn.utils.clip_grad import GradClipper
 from audyn.utils.data import BaseDataLoaders
-from audyn.utils.driver import BaseTrainer
 from audyn.utils.logging import get_logger
 from audyn.utils.model import unwrap
 from audyn.utils.tensorboard import get_summary_writer
@@ -15,6 +14,7 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 
 from ...models.distillation import TeacherStudentModel
+from .base import BaseTrainer
 
 
 class StudentTrainer(BaseTrainer):
