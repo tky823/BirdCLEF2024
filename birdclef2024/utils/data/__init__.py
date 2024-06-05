@@ -274,8 +274,6 @@ def stratified_split_unseen_samples(
                 filename = line.strip()
                 existing_filenames.add(filename)
 
-    filenames = []
-
     with open(path) as f:
         reader = csv.reader(f)
 
@@ -291,7 +289,6 @@ def stratified_split_unseen_samples(
                 # then skip it to avoid data leakage and duplicates.
                 pass
             else:
-                primary_label, *_, filename = line
                 filenames[primary_label].append(filename)
 
     # split dataset
