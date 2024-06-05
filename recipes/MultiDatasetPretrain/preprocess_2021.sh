@@ -19,7 +19,7 @@ data="birdclef2024"
 
 birdclef2021_dataroot="${data_root}/birdclef-2021"
 csv_path="${birdclef2021_dataroot}/train_metadata.csv"
-audio_root="${birdclef2021_dataroot}/train_audio"
+audio_root="${birdclef2021_dataroot}/train_short_audio"
 
 dump_dir="${dump_root}/${data}"
 list_dir="${dump_dir}/list"
