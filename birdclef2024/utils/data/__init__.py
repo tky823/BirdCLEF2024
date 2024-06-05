@@ -499,7 +499,7 @@ def stratified_split_unseen_samples_2021(
     """
     primary_labels = set()
     primary_labels_path = os.path.join(
-        audyn_cache_dir, "data", "birdclef2023", "primary-labels.txt"
+        audyn_cache_dir, "data", "birdclef2021", "primary-labels.txt"
     )
 
     with open(primary_labels_path) as f:
