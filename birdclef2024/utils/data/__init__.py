@@ -364,8 +364,7 @@ def stratified_split_unseen_samples(
             else:
                 raise ValueError("Invalid format of line is detected.")
 
-            primary_label, *_, filename = line
-            filename, _ = os.path.splitext(filename)
+            filename, _ = os.path.splitext(path)
 
             if filename in existing_filenames:
                 # If given sample is included in existing_filenames,
