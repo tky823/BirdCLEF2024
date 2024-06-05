@@ -283,7 +283,7 @@ def stratified_split_unseen_samples(
             if idx < 1:
                 continue
 
-            primary_label, _, filename = line
+            primary_label, *_, filename = line
             filename, _ = os.path.splitext(filename)
 
             if filename in existing_filenames:
