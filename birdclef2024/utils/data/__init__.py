@@ -301,6 +301,69 @@ def stratified_split_unseen_samples(
             if idx < 1:
                 continue
 
+            if len(line) == 12:
+                version = 2023
+            elif len(line) == 13:
+                version = 2022
+            elif len(line) == 14:
+                version = 2021
+            else:
+                raise ValueError("Invalid format of line is detected.")
+
+            version = int(version)
+
+            if version == 2021:
+                (
+                    primary_label,
+                    secondary_labels,
+                    chirp_types,
+                    latitude,
+                    longitude,
+                    scientific_name,
+                    common_name,
+                    _,
+                    _,
+                    filename,
+                    _,
+                    rating,
+                    _,
+                    _,
+                ) = line
+                path = os.path.join(primary_label, filename)
+            elif version == 2022:
+                (
+                    primary_label,
+                    secondary_labels,
+                    chirp_types,
+                    latitude,
+                    longitude,
+                    scientific_name,
+                    common_name,
+                    _,
+                    _,
+                    rating,
+                    _,
+                    _,
+                    path,
+                ) = line
+            elif version in [2023, 2024]:
+                (
+                    primary_label,
+                    secondary_labels,
+                    chirp_types,
+                    latitude,
+                    longitude,
+                    scientific_name,
+                    common_name,
+                    _,
+                    _,
+                    rating,
+                    _,
+                    path,
+                ) = line
+            else:
+                raise ValueError("Invalid format of line is detected.")
+
             primary_label, *_, filename = line
             filename, _ = os.path.splitext(filename)
 
