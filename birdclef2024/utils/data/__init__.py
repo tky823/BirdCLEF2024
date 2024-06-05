@@ -101,7 +101,7 @@ def decode_csv_line(
 
     version = int(version)
 
-    if version == 2022:
+    if version == 2021:
         (
             primary_label,
             secondary_labels,
