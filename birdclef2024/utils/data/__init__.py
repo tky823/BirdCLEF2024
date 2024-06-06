@@ -8,7 +8,11 @@ from audyn.utils import audyn_cache_dir
 from audyn.utils.data.birdclef.birdclef2024 import primary_labels as birdclef2024_primary_labels
 
 from ._download import download_birdclef2024_pretrain_primary_labels
-from .collator import BirdCLEF2024AudioChunkingCollator, BirdCLEF2024BaselineCollator
+from .collator import (
+    BirdCLEF2024AudioChunkingCollator,
+    BirdCLEF2024BaselineCollator,
+    BirdCLEF2024PretrainCollator,
+)
 from .composer import (
     BirdCLEF2024AudioChunkingComposer,
     BirdCLEF2024AudioComposer,
@@ -42,6 +46,7 @@ __all__ = [
     "BirdCLEF2024SharedAudioComposer",
     "BirdCLEF2024VadBasedSharedAudioComposer",
     "BirdCLEF2024BaselineCollator",
+    "BirdCLEF2024PretrainCollator",
     "BirdCLEF2024AudioChunkingCollator",
     "birdclef2024_pretrain_primary_labels",
     "num_birdclef2024_pretrain_primary_labels",
