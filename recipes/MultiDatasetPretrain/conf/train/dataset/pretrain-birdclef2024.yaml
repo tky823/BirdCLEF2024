@@ -7,7 +7,7 @@ train:
   label_name_key: primary_label
   filename_key: filename
 validation:
-  _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelDataset
+  _target_: birdclef2024.utils.data.BirdCLEF2024PrimaryLabelMultiDataset
   list_path:
   feature_dir:
   audio_key: ${..train.audio_key}
