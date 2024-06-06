@@ -44,11 +44,11 @@ validation_list_path="${list_dir}/pretrain_validation.txt"
 
 if [ "${dump_format}" = "birdclef2024" ]; then
     if [ "${data}" = "birdclef2021+2022+2023+2024" ]; then
-        train_feature_dir="${data_root}"
-        validation_feature_dir="${data_root}"
-    else
         train_feature_dir="${data_root}/birdclef-2024"
         validation_feature_dir="${data_root}/birdclef-2024"
+    else
+        train_feature_dir="${data_root}"
+        validation_feature_dir="${data_root}"
     fi
 else
     train_feature_dir="${feature_dir}/train"
