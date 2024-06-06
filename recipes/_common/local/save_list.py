@@ -2,10 +2,10 @@ import glob
 import os
 
 import audyn
-from audyn.utils.data.birdclef.birdclef2024 import stratified_split
 from omegaconf import DictConfig
 
 from birdclef2024.utils import setup_config
+from birdclef2024.utils.data import stratified_split_2024
 
 
 @audyn.main()
@@ -24,7 +24,7 @@ def main(config: DictConfig) -> None:
         assert csv_path is not None, "Specify preprocess.csv_path."
         assert train_ratio is not None, "Specify preprocess.train_ratio."
 
-        train_filenames, validation_filenames = stratified_split(
+        train_filenames, validation_filenames = stratified_split_2024(
             csv_path,
             train_ratio=train_ratio,
             seed=config.system.seed,

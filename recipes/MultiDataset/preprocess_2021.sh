@@ -17,9 +17,9 @@ data="birdclef2024"
 
 . ../_common/parse_options.sh || exit 1;
 
-birdclef2022_dataroot="${data_root}/birdclef-2022"
-csv_path="${birdclef2022_dataroot}/train_metadata.csv"
-audio_root="${birdclef2022_dataroot}/train_audio"
+birdclef2021_dataroot="${data_root}/birdclef-2021"
+csv_path="${birdclef2021_dataroot}/train_metadata.csv"
+audio_root="${birdclef2021_dataroot}/train_audio"
 
 dump_dir="${dump_root}/${data}"
 list_dir="${dump_dir}/list"

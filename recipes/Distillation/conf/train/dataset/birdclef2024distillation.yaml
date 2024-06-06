@@ -10,6 +10,7 @@ train:
   unlabeled_audio_key: unlabeled_audio
   unlabeled_sample_rate_key: unlabeled_sample_rate
   unlabeled_filename_key: unlabeled_filename
+  duration: ${data.audio.duration}
   seed: ${system.seed}
 
 validation:
@@ -24,4 +25,5 @@ validation:
   unlabeled_audio_key: ${..train.unlabeled_audio_key}
   unlabeled_sample_rate_key: ${..train.unlabeled_sample_rate_key}
   unlabeled_filename_key: ${..train.unlabeled_filename_key}
+  duration: ${data.audio.duration}
   seed: ${..train.seed}

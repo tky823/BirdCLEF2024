@@ -20,6 +20,7 @@ __all__ = [
     "BirdCLEF2024AudioDataset",
     "WeightedBirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024PrimaryLabelDistillationDataset",
+    "BirdCLEF2024PrimaryLabelMultiDataset",
 ]
 
 
@@ -310,6 +311,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         unlabeled_audio_key: str = "unlabeled_audio",
         unlabeled_sample_rate_key: str = "unlabeled_sample_rate",
         unlabeled_filename_key: str = "unlabeled_filename",
+        duration: Optional[float] = 15,
         seed: int = 0,
         decode_audio_as_waveform: Optional[bool] = None,
         decode_audio_as_monoral: Optional[bool] = None,
@@ -336,6 +338,7 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         self.unlabeled_sample_rate_key = unlabeled_sample_rate_key
         self.unlabeled_filename_key = unlabeled_filename_key
 
+        self.duration = duration
         self.seed = seed
         self.generator = None
 
@@ -386,6 +389,9 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
         primary_label_mapping = self.primary_label_mapping
 
         unlabeled_audio_root = self.unlabeled_audio_root
+        unlabeled_filenames = self.unlabeled_filenames
+
+        duration = self.duration
 
         if self.generator is None:
             # should be initialized
@@ -399,12 +405,33 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
             self.generator = torch.Generator()
             self.generator.manual_seed(self.seed + worker_id)
 
-        idx = torch.randint(0, len(self.unlabeled_filenames), ()).item()
-        unlabeled_filename = self.unlabeled_filenames[idx]
+        g = self.generator
+
+        unlabeled_idx = torch.randint(0, len(unlabeled_filenames), (), generator=g)
+        unlabeled_idx = unlabeled_idx.item()
+        unlabeled_filename = unlabeled_filenames[unlabeled_idx]
 
         # labeled
         audio_path = os.path.join(labeled_audio_root, f"{labeled_filename}.ogg")
-        waveform, sample_rate = torchaudio.load(audio_path)
+        metadata = torchaudio.info(audio_path)
+
+        if duration is not None:
+            sample_rate = metadata.sample_rate
+            num_frames = metadata.num_frames
+            length = int(sample_rate * duration)
+
+            if length < num_frames:
+                frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+                frame_offset = frame_offset.item()
+            else:
+                frame_offset = 0
+                length = -1
+
+            waveform, sample_rate = torchaudio.load(
+                audio_path, frame_offset=frame_offset, num_frames=length
+            )
+        else:
+            waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:
             waveform = waveform.mean(dim=0)
@@ -419,7 +446,27 @@ class BirdCLEF2024PrimaryLabelDistillationDataset(Dataset):
 
         # unlabeled
         audio_path = os.path.join(unlabeled_audio_root, f"{unlabeled_filename}.ogg")
-        waveform, sample_rate = torchaudio.load(audio_path)
+        metadata = torchaudio.info(audio_path)
+
+        if duration is not None:
+            sample_rate = metadata.sample_rate
+            num_frames = metadata.num_frames
+            length = int(sample_rate * duration)
+
+            if length < num_frames:
+                frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+                frame_offset = frame_offset.item()
+            else:
+                frame_offset = 0
+                length = -1
+
+            frame_offset = torch.randint(0, num_frames - length, (), generator=g)
+            frame_offset = frame_offset.item()
+            waveform, sample_rate = torchaudio.load(
+                audio_path, frame_offset=frame_offset, num_frames=length
+            )
+        else:
+            waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:
             waveform = waveform.mean(dim=0)
@@ -451,20 +498,14 @@ class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
     """Dataset for training of bird classification model using BirdCLEF2021-2024.
 
     Args:
-        labeled_list_path (str): Path to list file with known primary label. Each entry represents
-            path to audio file without extension such as ``birdclef-2024/abethr1/XC128013``.
-        unlabeled_list_path (str): Path to list file with unknown primary label. Each entry
-            represents path to audio file without extension such as ``460830``.
+        list_path (str): Path to list file. Each entry represents path to audio file
+            without extension such as ``birdclef-2024/asbfly/XC49755``.
         feature_dir (str): Path to dataset containing ``train_metadata.csv`` file,
             ``train_audio`` directory, and so on.
-        labeled_audio_key (str): Key of labeled audio.
-        labeled_sample_rate_key (str): Key of sampling rate of labeled audio.
+        audio_key (str): Key of audio.
+        sample_rate_key (str): Key of sampling rate.
         label_name_key (str): Key of prmary label name in given sample.
-        labeled_filename_key (str): Key of filename of labeled audio in given sample.
-        unlabeled_audio_key (str): Key of unlabeled audio.
-        unlabeled_sample_rate_key (str): Key of sampling rate of unlabeled audio.
-        unlabeled_filename_key (str): Key of filename of unlabeled audio in given sample.
-        seed (int): Random seed to sample unlabeled audio.
+        filename_key (str): Key of filename in given sample.
         decode_audio_as_waveform (bool, optional): If ``True``, audio is decoded as waveform
             tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
             waveform tensor and sampling rate. Default: ``True``.
@@ -555,7 +596,12 @@ class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
         challenge = file["challenge"]
         filename = file["filename"]
         audio_root = os.path.join(feature_dir, challenge)
-        audio_path = os.path.join(audio_root, "train_audio", f"{filename}.ogg")
+
+        if challenge in ["birdclef-2021"]:
+            audio_path = os.path.join(audio_root, "train_short_audio", f"{filename}.ogg")
+        else:
+            audio_path = os.path.join(audio_root, "train_audio", f"{filename}.ogg")
+
         waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:

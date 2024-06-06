@@ -1,6 +1,7 @@
 import warnings
 from typing import Any, Dict, List, Optional
 
+import torchvision
 from audyn.utils.data.birdclef.birdclef2024.collator import (
     BirdCLEF2024BaselineCollator as _BirdCLEF2024BaselineCollator,
 )
@@ -15,12 +16,41 @@ from .composer import (
 
 __all__ = [
     "BirdCLEF2024BaselineCollator",
+    "BirdCLEF2024PretrainCollator",
     "BirdCLEF2024AudioChunkingCollator",
 ]
 
 
 class BirdCLEF2024BaselineCollator(_BirdCLEF2024BaselineCollator):
     """Alias of audyn.utils.data.birdclef.birdclef2024.collator.BirdCLEF2024BaselineCollator"""
+
+
+class BirdCLEF2024PretrainCollator(BirdCLEF2024BaselineCollator):
+    def __init__(
+        self,
+        composer: Composer | None = None,
+        melspectrogram_key: str = "melspectrogram",
+        label_index_key: str = "label_index",
+        alpha: float = 0.4,
+    ) -> None:
+        super().__init__(
+            composer=composer,
+            melspectrogram_key=melspectrogram_key,
+            label_index_key=label_index_key,
+            alpha=alpha,
+        )
+
+        from . import num_birdclef2024_pretrain_primary_labels
+
+        try:
+            from torchvision.transforms.v2 import MixUp
+        except ImportError:
+            raise ImportError(f"MixUp is not supported by torchvision=={torchvision.__version__}")
+
+        self.mixup = MixUp(
+            alpha=alpha,
+            num_classes=num_birdclef2024_pretrain_primary_labels,
+        )
 
 
 class BirdCLEF2024AudioChunkingCollator(Collator):

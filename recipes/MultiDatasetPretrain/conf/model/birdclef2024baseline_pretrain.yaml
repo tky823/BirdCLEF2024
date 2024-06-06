@@ -1,0 +1,3 @@
+_target_: birdclef2024.models.baseline.BaselineModel
+weights: ${const:torchvision.models.EfficientNet_B2_Weights.IMAGENET1K_V1}
+num_classes: ${const:birdclef2024.utils.data.num_birdclef2024_pretrain_primary_labels}
