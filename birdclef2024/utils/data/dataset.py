@@ -596,7 +596,12 @@ class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
         challenge = file["challenge"]
         filename = file["filename"]
         audio_root = os.path.join(feature_dir, challenge)
-        audio_path = os.path.join(audio_root, "train_audio", f"{filename}.ogg")
+
+        if challenge in ["birdclef-2021"]:
+            audio_path = os.path.join(audio_root, "train_short_audio", f"{filename}.ogg")
+        else:
+            audio_path = os.path.join(audio_root, "train_audio", f"{filename}.ogg")
+
         waveform, sample_rate = torchaudio.load(audio_path)
 
         if self.decode_audio_as_monoral:
