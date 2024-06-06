@@ -85,3 +85,39 @@ criterion="birdclef2024"
 --lr-scheduler "${lr_scheduler}" \
 --criterion "${criterion}"
 ```
+
+### Stage 2: Finetuning baseline model
+
+To finetune baseline model, run the following command:
+
+```sh
+tag=<TAG>
+
+# "../data" is used by default
+# On kaggle environment, "/kaggle/input"
+data_root=<PATH/TO/ROOT/OF/DATA>
+
+# "torch", "webdataset", or "birdclef2024"
+dump_format="birdclef2024"
+
+# NOTE: "train" config depends on "dump_format".
+data="birdclef2024"
+train="birdclef2024baseline_finetune-birdclef2024"
+model="birdclef2024baseline_finetune"
+optimizer="birdclef2024baseline"
+lr_scheduler="cos_anneal"
+criterion="birdclef2024"
+
+. ./run.sh \
+--stage 2 \
+--stop-stage 2 \
+--tag "${tag}" \
+--data-root "${data_root}" \
+--dump-format "${dump_format}" \
+--data "${data}" \
+--train "${train}" \
+--model "${model}" \
+--optimizer "${optimizer}" \
+--lr-scheduler "${lr_scheduler}" \
+--criterion "${criterion}"
+```
