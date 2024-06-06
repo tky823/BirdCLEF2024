@@ -48,7 +48,7 @@ data="birdclef2024"
 
 **NOTE**: `${data}/feature/train`, `${data}/feature/validation`, `${data}/feature/unlabeled_train`, `${data}/feature/unlabeled_validation`, `${data}/feature/train_2023`, `${data}/feature/validation_2023`, `${data}/feature/train_2022`, `${data}/feature/validation_2022`, `${data}/feature/train_2021`, and `${data}/feature/validation_2021` directories are empty when `dump_format=birdclef2024`.
 
-### Stage 1: Training baseline model
+### Stage 1: Pretraining baseline model
 
 Before training, set `HUGGINGFACE_TOKEN` and `HUGGINGFACE_REPO_ID` in `.env` file.
 
