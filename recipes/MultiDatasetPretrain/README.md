@@ -33,7 +33,7 @@ Then, unzip the files.
 # On kaggle environment, "/kaggle/input"
 data_root=<PATH/TO/ROOT/OF/DATA>
 
-# Only dump_format="birdclef2024" is supported.
+# "torch", "webdataset", or "birdclef2024"
 dump_format="birdclef2024"
 
 data="birdclef2024"
@@ -66,7 +66,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024"
-train="birdclef2024baseline_pretrain-birdclef2024"
+train="birdclef2024baseline_pretrain-birdclef2024"  # or "birdclef2024baseline_pretrain-webdataset"
 model="birdclef2024baseline_pretrain"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
