@@ -50,6 +50,9 @@ if [ "${dump_format}" = "birdclef2024" ]; then
         train_feature_dir="${data_root}"
         validation_feature_dir="${data_root}"
     fi
+elif [ "${dump_format}" = "webdataset" ]; then
+    train_feature_dir="${feature_dir}"
+    validation_feature_dir="${feature_dir}"
 else
     train_feature_dir="${feature_dir}/train"
     validation_feature_dir="${feature_dir}/validation"
