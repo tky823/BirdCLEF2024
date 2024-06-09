@@ -2,3 +2,7 @@ defaults:
   - birdclef2024baseline
   - override dataset: webdataset
   - _self_
+
+dataset:
+  train:
+    shuffle_size: 1000
