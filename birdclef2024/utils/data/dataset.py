@@ -776,7 +776,7 @@ class BirdCLEF2024PrimaryLabelMultiWebDataset(IterableDataset):
         yield from self._decode()
 
     def __len__(self) -> int:
-        return len(self.sampler.num_samples)
+        return self.sampler.num_samples
 
     def _decode(self) -> Iterator[Dict[str, Any]]:
         """Return decoding iterator called in __iter__."""
