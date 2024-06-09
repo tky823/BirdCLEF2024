@@ -6,5 +6,6 @@ __all__ = [
     "BaseGenerator",
     "SharedAudioGenerator",
     "AverageAudioGenerator",
+    "ArgmaxAverageAudioGenerator",
     "StudentTrainer",
 ]

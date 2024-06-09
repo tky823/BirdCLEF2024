@@ -2,6 +2,7 @@ import os
 from typing import Dict, List
 
 import torch
+import torch.nn.functional as F
 from audyn.utils import instantiate
 from audyn.utils.driver import BaseGenerator as _BaseGenerator
 from audyn.utils.driver import BaseTrainer as _BaseTrainer
@@ -209,7 +210,7 @@ class SharedAudioGenerator(BaseGenerator):
 class AverageAudioGenerator(BaseGenerator):
     """Generator for BirdCLEF2024.
 
-    This generator aggregates framewise output by avaraging.
+    This generator aggregates framewise output by averaging.
 
     """
 
@@ -262,6 +263,78 @@ class AverageAudioGenerator(BaseGenerator):
                         reference = transform(reference)
 
                 reference = torch.mean(reference, dim=0)
+
+                for sample_idx in range(num_samples):
+                    identifier_mapping = {
+                        identifier_key: named_identifier[identifier_key][sample_idx]
+                        for identifier_key in identifier_keys
+                    }
+                    path = os.path.join(self.inference_dir, filename)
+                    path = path.format(**identifier_mapping)
+                    self.save_torch_dump(output, path)
+
+
+class ArgmaxAverageAudioGenerator(BaseGenerator):
+    """Generator for BirdCLEF2024.
+
+    This generator aggregates framewise output by averaging.
+    Then, argmax is applied.
+
+    """
+
+    @run_only_master_rank()
+    def save_torch_dump_if_necessary(
+        self,
+        named_output: Dict[str, torch.Tensor],
+        named_reference: Dict[str, torch.Tensor],
+        named_identifier: Dict[str, List[str]],
+        key_mapping: DictConfig = None,
+        transforms: DictConfig = None,
+    ) -> None:
+        identifier_keys = named_identifier.keys()
+
+        if hasattr(key_mapping, "output") and key_mapping.output is not None:
+            if named_output is None:
+                raise ValueError("named_output is not specified.")
+
+            for key, filename in key_mapping.output.items():
+                output = named_output[key]
+                num_samples = len(output)
+
+                if transforms is not None and transforms.output is not None:
+                    if key in transforms.output.keys():
+                        transform = instantiate(transforms.output[key])
+                        output = transform(output)
+
+                output = torch.mean(output, dim=0)
+                max_class_idx = torch.argmax(output)
+                output = F.one_hot(max_class_idx, num_classes=output.size(-1))
+
+                for sample_idx in range(num_samples):
+                    identifier_mapping = {
+                        identifier_key: named_identifier[identifier_key][sample_idx]
+                        for identifier_key in identifier_keys
+                    }
+                    path = os.path.join(self.inference_dir, filename)
+                    path = path.format(**identifier_mapping)
+                    self.save_torch_dump(output, path)
+
+        if hasattr(key_mapping, "reference") and key_mapping.reference is not None:
+            if named_reference is None:
+                raise ValueError("named_reference is not specified.")
+
+            for key, filename in key_mapping.reference.items():
+                reference = named_reference[key]
+                num_samples = len(reference)
+
+                if transforms is not None and transforms.reference is not None:
+                    if key in transforms.reference.keys():
+                        transform = instantiate(transforms.reference[key])
+                        reference = transform(reference)
+
+                reference = torch.mean(reference, dim=0)
+                max_class_idx = torch.argmax(reference)
+                reference = F.one_hot(max_class_idx, num_classes=reference.size(-1))
 
                 for sample_idx in range(num_samples):
                     identifier_mapping = {
