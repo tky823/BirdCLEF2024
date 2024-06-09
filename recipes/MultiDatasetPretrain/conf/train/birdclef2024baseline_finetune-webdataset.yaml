@@ -1,0 +1,6 @@
+defaults:
+  - birdclef2024baseline_webdataset
+  - _self_
+
+resume:
+  checkpoint:

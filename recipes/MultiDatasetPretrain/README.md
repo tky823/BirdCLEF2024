@@ -102,7 +102,7 @@ dump_format="birdclef2024"
 
 # NOTE: "train" config depends on "dump_format".
 data="birdclef2024"
-train="birdclef2024baseline_finetune-birdclef2024"
+train="birdclef2024baseline_finetune-birdclef2024"  # "birdclef2024baseline_finetune-birdclef2024" or "birdclef2024baseline_finetune-webdataset"
 model="birdclef2024baseline_finetune"
 optimizer="birdclef2024baseline"
 lr_scheduler="cos_anneal"
