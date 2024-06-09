@@ -1,0 +1,16 @@
+defaults:
+  - birdclef2024baseline
+  - override dataset: pretrain-webdataset
+  - _self_
+
+dataloader:
+  train:
+    collate_fn:
+      _target_: birdclef2024.utils.data.BirdCLEF2024PretrainCollator
+      composer:
+        _target_: birdclef2024.utils.data.BirdCLEF2024PretrainPrimaryLabelComposer
+  validation:
+    collate_fn:
+      _target_: birdclef2024.utils.data.BirdCLEF2024PretrainCollator
+      composer:
+        _target_: birdclef2024.utils.data.BirdCLEF2024PretrainPrimaryLabelComposer
