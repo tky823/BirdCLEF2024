@@ -100,18 +100,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "Preprocess stage 3: Create list for additional training set."
-
-    mkdir -p "${list_dir}"
-
-    subset="additional_train"
-    subset_list_path="${list_dir}/${subset}.txt"
-
-    :> "${subset_list_path}"
-fi
-
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "Preprocess stage 4: Save list of test set."
+    echo "Preprocess stage 3: Save list of test set."
 
     mkdir -p "${list_dir}"
 
