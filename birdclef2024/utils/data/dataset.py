@@ -1,7 +1,11 @@
 import csv
 import glob
+import json
 import os
-from typing import Any, Dict, Iterator, List, Optional
+import re
+import tarfile
+from io import BytesIO
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Type
 
 import torch
 import torchaudio
@@ -11,7 +15,19 @@ from audyn.utils.data.birdclef.birdclef2024.dataset import (
 from audyn.utils.data.birdclef.birdclef2024.dataset import (
     BirdCLEF2024PrimaryLabelDataset as _BirdCLEF2024PrimaryLabelDataset,
 )
-from torch.utils.data import Dataset, IterableDataset, get_worker_info
+from audyn.utils.data.webdataset import (
+    supported_audio_extensions,
+    supported_json_extensions,
+    supported_text_extensions,
+    supported_torchdump_extensions,
+)
+from torch.utils.data import (
+    Dataset,
+    IterableDataset,
+    RandomSampler,
+    SequentialSampler,
+    get_worker_info,
+)
 
 from .sampler import BirdCLEF2024WeightedRandomSampler
 
@@ -21,6 +37,7 @@ __all__ = [
     "WeightedBirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024PrimaryLabelDistillationDataset",
     "BirdCLEF2024PrimaryLabelMultiDataset",
+    "BirdCLEF2024PrimaryLabelMultiWebDataset",
 ]
 
 
@@ -627,3 +644,255 @@ class BirdCLEF2024PrimaryLabelMultiDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.files)
+
+
+class BirdCLEF2024PrimaryLabelMultiWebDataset(IterableDataset):
+    """Dataset for training of bird classification model using BirdCLEF2021-2024.
+
+    Args:
+        list_path (str): Path to list file. Each entry represents path to audio file
+            without extension such as ``birdclef-2024/asbfly/XC49755``.
+        feature_dir (str): Path to dataset containing ``train_metadata.csv`` file,
+            ``train_audio`` directory, and so on.
+        decode_audio_as_waveform (bool, optional): If ``True``, audio is decoded as waveform
+            tensor and sampling rate is ignored. Otherwise, audio is decoded as tuple of
+            waveform tensor and sampling rate. Default: ``True``.
+        decode_audio_as_monoral (bool, optional): If ``True``, decoded audio is treated as
+            monoral waveform of shape (num_samples,) by reducing channel dimension. Otherwise,
+            shape of waveform is (num_channels, num_samples), which is returned by
+            ``torchaudio.load``. Default: ``True``.
+
+    """
+
+    def __init__(
+        self,
+        list_path: str,
+        feature_dir: str,
+        shuffle: bool = False,
+        decode_audio_as_waveform: Optional[bool] = None,
+        decode_audio_as_monoral: Optional[bool] = None,
+    ) -> None:
+        super().__init__()
+
+        self.list_path = list_path
+        self.feature_dir = feature_dir
+
+        if decode_audio_as_waveform is None:
+            decode_audio_as_waveform = True
+
+        if decode_audio_as_monoral is None:
+            decode_audio_as_monoral = True
+
+        self.shuffle = shuffle
+        self.decode_audio_as_waveform = decode_audio_as_waveform
+        self.decode_audio_as_monoral = decode_audio_as_monoral
+
+        challenges = set()
+
+        with open(list_path) as f:
+            for line in f:
+                filename = line.strip()
+                challenge, filename = filename.split("/", maxsplit=1)
+                challenges.add(challenge)
+
+        challenges = sorted(list(challenges))
+
+        filenames = set()
+        mapping = {}
+        files: Dict[str, _PicklableFile] = {}
+
+        for challenge in challenges:
+            subset = self._challenge_to_subset(challenge, training=shuffle)
+
+            for url in sorted(glob.glob(os.path.join(feature_dir, subset, "*.tar"))):
+                with tarfile.open(url) as f:
+                    for tarinfo in f:
+                        filename, key = tarinfo.name.split(".", maxsplit=1)
+
+                        if filename not in filenames:
+                            filenames.add(filename)
+                            mapping[filename] = {
+                                "__url__": url,
+                                "data": {},
+                            }
+
+                        data = {
+                            "offset_data": tarinfo.offset_data,
+                            "size": tarinfo.size,
+                        }
+                        mapping[filename]["data"][key] = data
+
+                files[url] = _PicklableFile(url)
+
+        filenames = set(mapping.keys())
+
+        with open(list_path) as f:
+            assert len(filenames) == sum(1 for _ in f)
+
+        self.mapping = mapping
+        self.files = files
+        self.worker_id = None
+        self.filenames = sorted(list(filenames))
+
+        # set sampler
+        self.set_sampler(
+            filenames=self.filenames,
+            shuffle=self.shuffle,
+            replacement=False,
+        )
+
+        self.close_all()
+
+    def __iter__(self) -> Iterable[Dict[str, Any]]:
+        if self.worker_id is None:
+            # should be initialized
+            worker_info = get_worker_info()
+
+            if worker_info is None:
+                self.worker_id = 0
+                num_workers = 1
+            else:
+                self.worker_id = worker_info.id
+                num_workers = worker_info.num_workers
+
+            num_total_samples = len(self.sampler)
+            num_longer_workers = num_total_samples % num_workers
+            num_samples_per_worker = num_total_samples // num_workers
+
+            if self.worker_id < num_longer_workers:
+                start_index = (num_samples_per_worker + 1) * self.worker_id
+                end_index = (num_samples_per_worker + 1) * (self.worker_id + 1)
+            else:
+                start_index = (num_samples_per_worker + 1) * num_longer_workers
+                start_index += num_samples_per_worker * (self.worker_id - num_longer_workers)
+                end_index = start_index + num_samples_per_worker
+
+            self.sampler.data_source = self.filenames[start_index:end_index]
+
+            for url in self.files.keys():
+                self.files[url].close()
+                self.files[url] = _PicklableFile(url)
+
+        yield from self._decode()
+
+    def __len__(self) -> int:
+        return len(self.files)
+
+    def _decode(self) -> Iterator[Dict[str, Any]]:
+        """Return decoding iterator called in __iter__."""
+        for index in self.sampler:
+            filename = self.filenames[index]
+            mapping = self.mapping[filename]
+            url = mapping["__url__"]
+            data: Dict[str, Any] = mapping["data"]
+            f = self.files[url]
+
+            sample = {
+                "__key__": filename,
+                "__url__": url,
+            }
+
+            for key, value in data.items():
+                if key.startswith("__"):
+                    continue
+
+                offset_data = value["offset_data"]
+                size = value["size"]
+
+                f.seek(offset_data)
+                binary = f.read(size)
+                ext = re.sub(r".*[.]", "", key)
+
+                # based on
+                # https://github.com/webdataset/webdataset/blob/f11fd66c163722c607ec99475a6f3cb880ec35b8/webdataset/autodecode.py#L156
+                if ext in supported_json_extensions:
+                    decoded = json.loads(binary)
+                elif ext in supported_text_extensions:
+                    decoded = binary.decode()
+                elif ext in supported_torchdump_extensions:
+                    binary = BytesIO(binary)
+                    decoded = torch.load(binary)
+                elif ext in supported_audio_extensions:
+                    # NOTE: Decoding is applied in composer like ordinary webdataset.
+                    decoded = binary
+                else:
+                    raise ValueError(f"Invalid key {key} is detected.")
+
+                sample[key] = decoded
+
+            yield sample
+
+    def _challenge_to_subset(self, challenge: str, training: bool = False) -> str:
+        if challenge == "birdclef-2024":
+            if training:
+                subset = "train"
+            else:
+                subset = "validation"
+        elif challenge == "birdclef-2023":
+            if training:
+                subset = "train_2023"
+            else:
+                subset = "validation_2023"
+        elif challenge == "birdclef-2022":
+            if training:
+                subset = "train_2022"
+            else:
+                subset = "validation_2022"
+        elif challenge == "birdclef-2021":
+            if training:
+                subset = "train_2021"
+            else:
+                subset = "validation_2021"
+        else:
+            raise NotImplementedError(f"{challenge} is not supported as challenge.")
+
+        return subset
+
+    def set_sampler(
+        self,
+        filenames: Optional[str] = None,
+        shuffle: bool = False,
+        replacement: bool = False,
+    ) -> None:
+        if filenames is None:
+            filenames = self.filenames
+
+        if shuffle:
+            self.sampler = RandomSampler(
+                filenames,
+                replacement=replacement,
+                num_samples=len(filenames),
+            )
+        else:
+            assert not replacement
+
+            self.sampler = SequentialSampler(filenames)
+
+    def close_all(self, *args, **kwargs) -> None:
+        """Close all tar files."""
+        for url in self.files.keys():
+            self.files[url].close(*args, **kwargs)
+
+
+class _PicklableFile:
+    """Wrapper class of io.BufferedReader to pickle."""
+
+    def __init__(self, path: str) -> None:
+        self.path = path
+        self.file = open(path, mode="rb")
+
+    def __reduce__(self) -> Tuple[Type, Tuple[str]]:
+        self.file.close()
+        return self.__class__, (self.path,)
+
+    def seek(self, *args, **kwargs) -> int:
+        """Wrapper of file.seek."""
+        return self.file.seek(*args, **kwargs)
+
+    def read(self, *args, **kwargs) -> bytes:
+        """Wrapper of file.read."""
+        return self.file.read(*args, **kwargs)
+
+    def close(self, *args, **kwargs) -> None:
+        """Wrapper of file.close."""
+        return self.file.close(*args, **kwargs)

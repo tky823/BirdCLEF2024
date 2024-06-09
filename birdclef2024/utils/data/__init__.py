@@ -27,6 +27,7 @@ from .dataset import (
     BirdCLEF2024PrimaryLabelDataset,
     BirdCLEF2024PrimaryLabelDistillationDataset,
     BirdCLEF2024PrimaryLabelMultiDataset,
+    BirdCLEF2024PrimaryLabelMultiWebDataset,
     WeightedBirdCLEF2024PrimaryLabelDataset,
 )
 from .sampler import BirdCLEF2024WeightedRandomSampler
@@ -37,6 +38,7 @@ __all__ = [
     "WeightedBirdCLEF2024PrimaryLabelDataset",
     "BirdCLEF2024PrimaryLabelDistillationDataset",
     "BirdCLEF2024PrimaryLabelMultiDataset",
+    "BirdCLEF2024PrimaryLabelMultiWebDataset",
     "BirdCLEF2024WeightedRandomSampler",
     "BirdCLEF2024PrimaryLabelComposer",
     "BirdCLEF2024PretrainPrimaryLabelComposer",
